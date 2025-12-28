@@ -1,8 +1,7 @@
-﻿namespace DAL.Entities
-{
-    public interface IBaseEntity
-    {
-       public int Id { get; set; }
+namespace DAL.Entities;
 
-    }
+public interface IBaseEntity
+{
+    int Id { get; set; }
+
 }

@@ -1,10 +1,9 @@
-﻿using DAL.Data;
+using DAL.Data;
 using DAL.Entities;
 using DAL.Interfaces;
 
-namespace DAL.Repositories
+namespace DAL.Repositories;
+
+public class ScheduleRepository(AppDbContext context) : BaseRepository<Schedule>(context), IScheduleRepository
 {
-    public class ScheduleRepository(AppDbContext context) : BaseRepository<Schedule>(context), IScheduleRepository
-    {
-    }
 }

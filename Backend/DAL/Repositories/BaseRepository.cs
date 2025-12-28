@@ -1,66 +1,60 @@
-﻿using DAL.Data;
+using DAL.Data;
 using DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DAL.Repositories
+namespace DAL.Repositories;
+
+public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
 {
-    public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
+    protected AppDbContext Context { get; }
+    protected DbSet<TEntity> DbSet { get; }
+
+    public BaseRepository(AppDbContext context)
     {
-        protected AppDbContext _context { get; }
-        protected DbSet<TEntity> _dbSet { get; }
+        this.Context = context;
+        this.DbSet = context.Set<TEntity>();
+    }
 
-        public BaseRepository(AppDbContext context)
+    public async Task AddAsync(TEntity entity)
+    {
+        await this.DbSet.AddAsync(entity);
+        await this.Context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(TEntity entity)
+    {
+        this.DbSet.Remove(entity);
+        await this.Context.SaveChangesAsync();
+    }
+
+    public async Task DeleteByIdAsync(int id)
+    {
+        var entity = await this.DbSet.FindAsync(id);
+        if (entity != null)
         {
-            _context = context;
-            _dbSet = context.Set<TEntity>();
+            await this.DeleteAsync(entity);
         }
+    }
 
-        public async Task AddAsync(TEntity entity)
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    {
+        return await this.DbSet.ToListAsync();
+    }
+
+    // Додаємо знак питання до TEntity
+    public async Task<TEntity?> GetByIdAsync(int id)
+    {
+        return await this.DbSet.FindAsync(id);
+    }
+
+    public async Task UpdateAsync(TEntity entity)
+    {
+        if (this.Context.Entry(entity).State == EntityState.Detached)
         {
-            await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            this.DbSet.Attach(entity);
         }
+        this.Context.Entry(entity).State = EntityState.Modified;
 
-        public async Task DeleteAsync(TEntity entity)
-        {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteByIdAsync(int id)
-        {
-            var entity = await _dbSet.FindAsync(id);
-            if (entity != null)
-            {
-                await DeleteAsync(entity);
-            }
-        }
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
-
-        public async Task<TEntity> GetByIdAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
-
-        public async Task UpdateAsync(TEntity entity)
-        {
-            if (_context.Entry(entity).State == EntityState.Detached)
-            {
-                _dbSet.Attach(entity);
-            }
-            _context.Entry(entity).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
-        }
-
+        await this.Context.SaveChangesAsync();
     }
 }

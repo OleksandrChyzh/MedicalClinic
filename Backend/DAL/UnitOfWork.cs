@@ -1,4 +1,4 @@
-﻿using DAL.Data;
+using DAL.Data;
 using DAL.Entities;
 using DAL.Interfaces;
 using DAL.Repositories;
@@ -32,16 +32,16 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     {
         return typeof(TEntity).Name switch
         {
-            nameof(Appointment) => (IBaseRepository<TEntity>)AppointmentRepository,
-            nameof(Direction) => (IBaseRepository<TEntity>)DirectionRepository,
-            nameof(Doctor) => (IBaseRepository<TEntity>)DoctorRepository,
-            nameof(MedicalRecord) => (IBaseRepository<TEntity>)MedicalRecordRepository,
-            nameof(Patient) => (IBaseRepository<TEntity>)PatientRepository,
-            nameof(Schedule) => (IBaseRepository<TEntity>)ScheduleRepository,
-            nameof(Service) => (IBaseRepository<TEntity>)ServiceRepository,
-            nameof(ServiceType) => (IBaseRepository<TEntity>)ServiceTypeRepository,
-            nameof(Review) => (IBaseRepository<TEntity>)ReviewRepository,
-            nameof(User) => (IBaseRepository<TEntity>)UserRepository,
+            nameof(Appointment) => (IBaseRepository<TEntity>)this.AppointmentRepository,
+            nameof(Direction) => (IBaseRepository<TEntity>)this.DirectionRepository,
+            nameof(Doctor) => (IBaseRepository<TEntity>)this.DoctorRepository,
+            nameof(MedicalRecord) => (IBaseRepository<TEntity>)this.MedicalRecordRepository,
+            nameof(Patient) => (IBaseRepository<TEntity>)this.PatientRepository,
+            nameof(Schedule) => (IBaseRepository<TEntity>)this.ScheduleRepository,
+            nameof(Service) => (IBaseRepository<TEntity>)this.ServiceRepository,
+            nameof(ServiceType) => (IBaseRepository<TEntity>)this.ServiceTypeRepository,
+            nameof(Review) => (IBaseRepository<TEntity>)this.ReviewRepository,
+            nameof(User) => (IBaseRepository<TEntity>)this.UserRepository,
             _ => throw new InvalidOperationException($"Repository for type {typeof(TEntity)} not found"),
         };
     }

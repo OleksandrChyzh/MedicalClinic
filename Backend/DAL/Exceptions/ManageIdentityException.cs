@@ -1,20 +1,23 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
-namespace DAL.Exceptions
+namespace DAL.Exceptions;
+
+public class ManageIdentityException(string message) : Exception(message)
 {
-    public class ManageIdentityException(string message) : Exception(message)
+    public ManageIdentityException() : this("An identity error occurred.")
     {
-        public static void Throw(IdentityResult result)
+    }
+
+    public ManageIdentityException(string message, Exception innerException)
+        : this(message)
+    {
+    }
+
+    public static void Throw(IdentityResult result)
+    {
+        if (!result.Succeeded)
         {
-            if (!result.Succeeded)
-            {
-                throw new ManageIdentityException(result.Errors.First().Description);
-            }
+            throw new ManageIdentityException(result.Errors.First().Description);
         }
     }
 }
