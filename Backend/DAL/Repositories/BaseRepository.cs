@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DAL.Data;
 using DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,6 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return await this.DbSet.ToListAsync();
     }
 
-    // Додаємо знак питання до TEntity
     public async Task<TEntity?> GetByIdAsync(int id)
     {
         return await this.DbSet.FindAsync(id);
@@ -56,5 +56,41 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         this.Context.Entry(entity).State = EntityState.Modified;
 
         await this.Context.SaveChangesAsync();
+    }
+    public async Task<IEnumerable<TEntity>> GetAllAsync(
+        Expression<Func<TEntity, bool>>? filter = null,
+        params Expression<Func<TEntity, object>>[] includes)
+    {
+        IQueryable<TEntity> query = this.DbSet;
+
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        return await query.ToListAsync();
+    }
+    public async Task<TEntity?> GetFirstOrDefaultAsync(
+        Expression<Func<TEntity, bool>>? filter = null,
+        params Expression<Func<TEntity, object>>[] includes)
+    {
+        IQueryable<TEntity> query = this.DbSet;
+
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        return await query.FirstOrDefaultAsync();
     }
 }
