@@ -1,5 +1,8 @@
+using BLL.Interfaces;
+using BLL.Services;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
+using BLL.MappingProfiles;
 
 namespace WebApp;
 
@@ -13,5 +16,10 @@ public static class ServiceExtensions
         });
 
         services.AddControllers();
+        services.AddAutoMapper(config =>
+        {
+            config.AddMaps(typeof(UserProfile).Assembly);
+        });
+        services.AddScoped<IAuthService, AuthService>();
     }
 }

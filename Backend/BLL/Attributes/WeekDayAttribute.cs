@@ -1,8 +1,6 @@
-﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
-namespace BusinessLogic.Attributes
+namespace BLL.Attributes
 {
     public class WeekDayAttribute : ValidationAttribute
     {

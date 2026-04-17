@@ -171,6 +171,26 @@ public class AppDbContext : IdentityDbContext<
             b.HasKey(a => a.Id);
             b.Property(a => a.Status).IsRequired().HasConversion<string>();
             b.Property(a => a.CreatedAt).HasDefaultValueSql("NOW()").IsRequired();
+
+            // Явне прописання зв'язків
+            b.HasOne(a => a.Patient)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Cascade); // Якщо видаляємо профіль пацієнта - видаляємо записи
+
+            b.HasOne(a => a.Doctor)
+                .WithMany(d => d.Appointments)
+                .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict); // Забороняємо видаляти лікаря, якщо є записи
+
+            b.HasOne(a => a.Service)
+                .WithMany(s => s.Appointments)
+                .HasForeignKey(a => a.ServiceId);
+
+            b.HasOne(a => a.User)
+                .WithMany(p => p.Appointments)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ============ REVIEWS ============

@@ -3,6 +3,8 @@ namespace DAL.Entities;
 public class Appointment : IBaseEntity
 {
     public int Id { get; set; }
+
+    public int UserId { get; set; }
     public int PatientId { get; set; }
     public int DoctorId { get; set; }
     public int ServiceId { get; set; }
@@ -11,6 +13,7 @@ public class Appointment : IBaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public virtual Patient Patient { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
     public virtual Doctor Doctor { get; set; } = null!;
     public virtual Service Service { get; set; } = null!;
 }

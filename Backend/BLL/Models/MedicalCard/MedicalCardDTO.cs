@@ -1,7 +1,7 @@
 using BLL.Models.MedicalRecord;
 
-namespace BLL.Models.MedicalCardDTO;
-public class MedicalCardDto
+namespace BLL.Models.MedicalCard;
+public class MedicalCardDTO
 {
     public int PatientId { get; set; }
     public string FullName { get; set; } = string.Empty;
