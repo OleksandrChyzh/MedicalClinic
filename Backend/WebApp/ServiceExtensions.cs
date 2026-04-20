@@ -24,6 +24,7 @@ public static class ServiceExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDirectionService, DirectionService>();
         services.AddScoped<IServiceManagementService, ServiceManagementService>();
+        services.AddScoped<IServiceTypeService, ServiceTypeService>();
 
     }
 }
