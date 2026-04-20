@@ -9,7 +9,7 @@ public class Appointment : IBaseEntity
     public int DoctorId { get; set; }
     public int ServiceId { get; set; }
     public DateTime AppointmentDate { get; set; }
-    public AppointmentStatus Status { get; set; } = AppointmentStatus.PENDING;
+    public AppointmentStatus Status { get; set; } = AppointmentStatus.CREATED;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public virtual Patient Patient { get; set; } = null!;
@@ -19,7 +19,7 @@ public class Appointment : IBaseEntity
 }
 public enum AppointmentStatus
 {
-    PENDING,
+    CREATED,
     CONFIRMED,
     CANCELLED,
     COMPLETED

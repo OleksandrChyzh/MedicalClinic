@@ -7,6 +7,9 @@ public class AddAppointmentDTO
     public int PatientId { get; set; }
 
     [Required]
+    public int UserId { get; set; }
+
+    [Required]
     public int DoctorId { get; set; }
 
     [Required]
