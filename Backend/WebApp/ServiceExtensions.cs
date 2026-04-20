@@ -21,5 +21,6 @@ public static class ServiceExtensions
             config.AddMaps(typeof(UserProfile).Assembly);
         });
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
     }
 }
