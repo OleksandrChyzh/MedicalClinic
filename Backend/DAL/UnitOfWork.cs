@@ -19,9 +19,6 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     public IUserRepository UserRepository { get; set; } = new UserRepository(context);
 
     public IServiceTypeRepository ServiceTypeRepository { get; set; } = new ServiceTypeRepository(context);
-    public IDoctorRepository OrderRepository { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public IMedicalRecordRepository OrderServiceRepository { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
     public Task SaveAsync()
     {
         return context.SaveChangesAsync();

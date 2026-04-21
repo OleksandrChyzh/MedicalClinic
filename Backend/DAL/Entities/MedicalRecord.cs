@@ -13,5 +13,5 @@ public class MedicalRecord : IBaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public virtual Patient Patient { get; set; } = null!;
     public virtual Doctor Doctor { get; set; } = null!;
-    public virtual Service Service { get; set; } = null!;
+    public virtual Service? Service { get; set; }
 }

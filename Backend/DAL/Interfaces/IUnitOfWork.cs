@@ -8,7 +8,7 @@ public interface IUnitOfWork
     IAppointmentRepository AppointmentRepository { get; set; }
     IDirectionRepository DirectionRepository { get; set; }
     IDoctorRepository DoctorRepository { get; set; }
-    IMedicalRecordRepository OrderServiceRepository { get; set; }
+    IMedicalRecordRepository MedicalRecordRepository { get; set; }
     IPatientRepository PatientRepository { get; set; }
     IScheduleRepository ScheduleRepository { get; set; }
     IServiceRepository ServiceRepository { get; set; }
