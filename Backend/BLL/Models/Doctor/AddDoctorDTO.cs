@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using BLL.Models.User;
 
 namespace BLL.Models.Doctor;
 public class AddDoctorDTO
 {
-    [Required]
-    public int UserId { get; set; }
 
     [Required]
     public int DirectionId { get; set; }
@@ -25,4 +24,7 @@ public class AddDoctorDTO
 
     [StringLength(1000)]
     public string? Description { get; set; }
+
+    [Required]
+    public Register Account { get; set; } = null!;
 }

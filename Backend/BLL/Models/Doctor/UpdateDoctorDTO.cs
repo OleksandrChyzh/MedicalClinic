@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BLL.Models.User;
 namespace BLL.Models.Doctor;
 public class UpdateDoctorDTO
 {
@@ -24,4 +25,6 @@ public class UpdateDoctorDTO
 
     [StringLength(1000)]
     public string? Description { get; set; }
+
+    public UpdateUser? Account { get; set; }
 }
