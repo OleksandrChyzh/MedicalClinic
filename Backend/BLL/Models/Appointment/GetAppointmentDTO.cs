@@ -13,4 +13,6 @@ public class GetAppointmentDTO
     public DateTime AppointmentDate { get; set; }
     public string Status { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+
+    public int DurationMinutes { get; set; } // Важливо для відображення на календарі
 }

@@ -18,4 +18,6 @@ public interface IAppointmentService
 
     // Зміна статусу (Лікар/Адмін)
     Task ChangeStatusAsync(int appointmentId, AppointmentStatus status);
+
+    Task<GetAppointmentDTO> CreateAppointmentByDoctorAsync(int doctorUserId, AddAppointmentDTO dto);
 }

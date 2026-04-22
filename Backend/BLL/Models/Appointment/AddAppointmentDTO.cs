@@ -18,4 +18,7 @@ public class AddAppointmentDTO
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime AppointmentDate { get; set; }
+
+    [Range(15, 480)]
+    public int DurationMinutes { get; set; } = 30;
 }

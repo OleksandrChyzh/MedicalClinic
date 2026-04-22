@@ -166,9 +166,19 @@ public class AppDbContext : IdentityDbContext<
         builder.Entity<Appointment>(b =>
         {
             b.ToTable("Appointments", t =>
-                t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= NOW()"));
+            {
+                t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= NOW()");
+                // НОВА ПЕРЕВІРКА: Тривалість прийому має бути більше нуля
+                t.HasCheckConstraint("CHK_Appointment_Duration_Positive", "\"DurationMinutes\" > 0");
+            });
 
             b.HasKey(a => a.Id);
+
+            // Явно вказуємо нове поле
+            b.Property(a => a.DurationMinutes)
+                .IsRequired()
+                .HasDefaultValue(30); // Можеш встановити 30 хв за замовчуванням (опціонально)
+
             b.Property(a => a.Status).IsRequired().HasConversion<string>();
             b.Property(a => a.CreatedAt).HasDefaultValueSql("NOW()").IsRequired();
 

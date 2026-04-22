@@ -12,8 +12,10 @@ public class AddScheduleDTO
     public string WeekDay { get; set; } = null!;
 
     [Required]
+    [RegularExpression(@"^([01]\d|2[0-3]):([0-5]\d)$", ErrorMessage = "Формат часу має бути HH:mm")]
     public string StartTime { get; set; } = "08:00"; 
 
     [Required]
+    [RegularExpression(@"^([01]\d|2[0-3]):([0-5]\d)$", ErrorMessage = "Формат часу має бути HH:mm")]
     public string EndTime { get; set; } = "17:00";
 }

@@ -17,4 +17,6 @@ public class UpdateAppointmentDTO
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime AppointmentDate { get; set; }
+
+    [Required] public int DurationMinutes { get; set; }
 }

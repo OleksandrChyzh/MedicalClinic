@@ -9,6 +9,8 @@ public class Appointment : IBaseEntity
     public int DoctorId { get; set; }
     public int ServiceId { get; set; }
     public DateTime AppointmentDate { get; set; }
+
+    public int DurationMinutes { get; set; } // Скільки триває запис
     public AppointmentStatus Status { get; set; } = AppointmentStatus.CREATED;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
