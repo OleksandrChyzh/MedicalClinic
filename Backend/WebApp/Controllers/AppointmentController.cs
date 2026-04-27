@@ -36,7 +36,7 @@ public class AppointmentController(IAppointmentService appointmentService, IUnit
             return this.Forbid();
         }
 
-        return Ok(await appointmentService.GetAppointmentsByDoctorIdAsync(doctor.Id));
+        return this.Ok(await appointmentService.GetAppointmentsByDoctorIdAsync(doctor.Id));
     }
 
     [HttpPost]
@@ -52,5 +52,36 @@ public class AppointmentController(IAppointmentService appointmentService, IUnit
     {
         await appointmentService.ChangeStatusAsync(id, status);
         return this.NoContent();
+    }
+
+    [Authorize(Roles = "Doctor,Admin")]
+    [HttpGet("doctor/{doctorId}/date/{date}")]
+    public async Task<IActionResult> GetDoctorAppointmentsByDate(int doctorId, DateTime date)
+    {
+        // Перевірка безпеки для ролі "Лікар"
+        if (this.User.IsInRole("Doctor"))
+        {
+            // Знаходимо DoctorId поточного користувача
+            var currentDoctor = await unitOfWork.DoctorRepository.GetFirstOrDefaultAsync(d => d.UserId == this.CurrentUserId);
+
+            // Якщо лікар намагається подивитися чужий розклад — блокуємо
+            if (currentDoctor == null || currentDoctor.Id != doctorId)
+            {
+                return this.Forbid();
+            }
+        }
+        // Адмін проходить цю перевірку безперешкодно
+
+        var appointments = await appointmentService.GetDoctorAppointmentsByDateAsync(doctorId, date);
+        return this.Ok(appointments);
+    }
+
+    [HttpGet("doctor/{doctorId}/available-slots")]
+    public async Task<IActionResult> GetAvailableSlots(int doctorId, [FromQuery] DateTime date)
+    {
+        // Оскільки ми просто дивимось вільні вікна (не персональні дані пацієнтів),
+        // цей метод може викликати будь-який авторизований користувач.
+        var slots = await appointmentService.GetAvailableSlotsAsync(doctorId, date);
+        return this.Ok(slots);
     }
 }

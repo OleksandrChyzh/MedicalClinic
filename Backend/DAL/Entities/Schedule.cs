@@ -1,4 +1,4 @@
-﻿namespace DAL.Entities;
+namespace DAL.Entities;
 public partial class Schedule : IBaseEntity
 {
     public int Id { get; set; }

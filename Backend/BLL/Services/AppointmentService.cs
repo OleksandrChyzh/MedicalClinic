@@ -5,7 +5,7 @@ using DAL.Entities;
 using DAL.Interfaces;
 
 namespace BLL.Services;
-public class AppointmentManagementService(IUnitOfWork unitOfWork, IMapper mapper) : IAppointmentService
+public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppointmentService
 {
     public async Task<IEnumerable<GetAppointmentDTO>> GetAllAppointmentsAsync()
     {
@@ -145,5 +145,103 @@ public class AppointmentManagementService(IUnitOfWork unitOfWork, IMapper mapper
         {
             throw new Exception($"Цей час уже зайнятий: {overlap.AppointmentDate:HH:mm} - {overlap.AppointmentDate.AddMinutes(overlap.DurationMinutes):HH:mm}");
         }
+    }
+
+    public async Task<IEnumerable<GetAppointmentDTO>> GetDoctorAppointmentsByDateAsync(int doctorId, DateTime targetDate)
+    {
+        var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
+            // Відфільтровуємо по DoctorId та збігу самої дати (без урахування часу)
+            filter: a => a.DoctorId == doctorId && a.AppointmentDate.Date == targetDate.Date,
+            // Обов'язково підтягуємо пов'язані сутності для DTO
+            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+        );
+
+        // Якщо потрібно, щоб записи йшли по порядку (від ранку до вечора), додаємо сортування:
+        var sortedAppointments = appointments.OrderBy(a => a.AppointmentDate);
+
+        return mapper.Map<IEnumerable<GetAppointmentDTO>>(sortedAppointments);
+    }
+
+    public async Task<AvailableSlotsResponseDTO> GetAvailableSlotsAsync(int doctorId, DateTime targetDate)
+    {
+        var response = new AvailableSlotsResponseDTO { DoctorId = doctorId, Date = targetDate.Date };
+
+        // 1. Отримуємо день тижня в потрібному форматі (якщо в БД українська)
+        var dayOfWeek = GetUkrainianDayOfWeek(targetDate);
+        // Якщо ж в БД зберігається англійською, заміни на: var dayOfWeek = targetDate.DayOfWeek.ToString();
+
+        // 2. Беремо розклад лікаря на цей день
+        var schedule = await unitOfWork.ScheduleRepository.GetFirstOrDefaultAsync(
+            s => s.DoctorId == doctorId && s.WeekDay == dayOfWeek);
+
+        if (schedule == null)
+        {
+            return response; // Лікар не працює в цей день, повертаємо порожній список
+        }
+
+        // 3. Беремо всі АКТИВНІ записи лікаря на цю дату
+        var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
+            a => a.DoctorId == doctorId &&
+                 a.AppointmentDate.Date == targetDate.Date &&
+                 a.Status != AppointmentStatus.CANCELLED
+        );
+
+        // 4. Генеруємо слоти (з кроком у 30 хвилин)
+        int slotDurationMinutes = 30;
+        var currentTime = schedule.StartTime;
+
+        // Перевіряємо поточний час (для фільтрації минулих слотів, якщо дата - сьогодні)
+        // Зверни увагу: якщо твій сервер в іншому часовому поясі, краще використовувати DateTime.Now або передавати таймзону
+        var now = DateTime.UtcNow.AddHours(2); // Приклад для Києва, адаптуй під свої потреби
+
+        while (currentTime.AddMinutes(slotDurationMinutes) <= schedule.EndTime)
+        {
+            var slotStartDateTime = targetDate.Date.Add(currentTime.ToTimeSpan());
+            var slotEndDateTime = slotStartDateTime.AddMinutes(slotDurationMinutes);
+
+            // Перевірка 1: Чи слот не в минулому?
+            bool isPast = slotStartDateTime <= now;
+
+            // Перевірка 2: Чи є накладка з існуючими Appointments?
+            bool isOverlapping = appointments.Any(a =>
+            {
+                var apptStart = a.AppointmentDate;
+                var apptEnd = apptStart.AddMinutes(a.DurationMinutes);
+                // Формула перетину: (StartA < EndB) AND (EndA > StartB)
+                return apptStart < slotEndDateTime && apptEnd > slotStartDateTime;
+            });
+
+            // Якщо час ще не минув і немає накладок — додаємо слот
+            if (!isPast && !isOverlapping)
+            {
+                response.FreeSlots.Add(new FreeSlotDTO
+                {
+                    StartTime = currentTime.ToString("HH:mm"),
+                    EndTime = currentTime.AddMinutes(slotDurationMinutes).ToString("HH:mm")
+                });
+            }
+
+            // Переходимо до наступного слота
+            currentTime = currentTime.AddMinutes(slotDurationMinutes);
+        }
+
+        return response;
+    }
+
+    // Допоміжний метод для перекладу днів тижня (додай його вниз файлу)
+    private string GetUkrainianDayOfWeek(DateTime date)
+    {
+        return date.DayOfWeek switch
+        {
+            DayOfWeek.Monday => "Понеділок",
+            DayOfWeek.Tuesday => "Вівторок",
+            DayOfWeek.Wednesday => "Середа",
+            DayOfWeek.Thursday => "Четвер",
+            DayOfWeek.Friday => "П'ятниця",
+            DayOfWeek.Saturday => "Субота",
+            DayOfWeek.Sunday => "Неділя",
+            // Використовуємо nameof(date), щоб уникнути помилок у назві змінної
+            _ => throw new ArgumentOutOfRangeException(nameof(date), $"Невідомий день тижня: {date.DayOfWeek}")
+        };
     }
 }

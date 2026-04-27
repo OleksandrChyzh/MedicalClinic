@@ -20,4 +20,9 @@ public interface IAppointmentService
     Task ChangeStatusAsync(int appointmentId, AppointmentStatus status);
 
     Task<GetAppointmentDTO> CreateAppointmentByDoctorAsync(int doctorUserId, AddAppointmentDTO dto);
+
+    Task<IEnumerable<GetAppointmentDTO>> GetDoctorAppointmentsByDateAsync(int doctorId, DateTime targetDate);
+
+    // Отримання вільних слотів для запису
+    Task<AvailableSlotsResponseDTO> GetAvailableSlotsAsync(int doctorId, DateTime targetDate);
 }
