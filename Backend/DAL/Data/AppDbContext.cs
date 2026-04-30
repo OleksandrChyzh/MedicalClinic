@@ -211,7 +211,11 @@ public class AppDbContext : IdentityDbContext<
 
             b.Property(r => r.Rating).IsRequired().HasDefaultValue(1);
             b.Property(r => r.Comment).HasMaxLength(1000);
-            b.Property(r => r.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // ПРИМУСОВО ставимо тип без часової зони, щоб прибрати "with time zone"
+            b.Property(r => r.CreatedAt)
+             .HasColumnType("timestamp without time zone")
+             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // ============ SCHEDULE ============
@@ -234,7 +238,11 @@ public class AppDbContext : IdentityDbContext<
             b.HasKey(e => e.Id);
             b.Property(e => e.Diagnosis).HasColumnType("text");
             b.Property(e => e.Treatment).HasColumnType("text");
-            b.Property(e => e.CreatedAt).HasColumnType("timestamp").HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // Вказуємо тип без часової зони
+            b.Property(e => e.CreatedAt)
+             .HasColumnType("timestamp without time zone")
+             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }
 }

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BLL\BLL.csproj" />
+    <ProjectReference Include="..\DataGenerator\DataGenerator.csproj" />
   </ItemGroup>
 
 </Project>

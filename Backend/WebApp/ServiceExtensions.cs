@@ -3,6 +3,10 @@ using BLL.Services;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using BLL.MappingProfiles;
+using DAL.Entities;
+using DAL.Interfaces;
+using DAL;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApp;
 
@@ -14,6 +18,19 @@ public static class ServiceExtensions
         {
             options.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
         });
+
+        // 2. РЕЄСТРАЦІЯ IDENTITY (Цього не вистачало для UserManager)
+        services.AddIdentity<User, IdentityRole<int>>(options =>
+        {
+            options.Password.RequireDigit = false; // Налаштування за бажанням
+            options.Password.RequiredLength = 6;
+        })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
+        // 3. РЕЄСТРАЦІЯ UNIT OF WORK (Цього не вистачало для BLL сервісів)
+        // Заміни UnitOfWork на назву свого класу реалізації, якщо вона інша
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddControllers();
         services.AddAutoMapper(config =>
