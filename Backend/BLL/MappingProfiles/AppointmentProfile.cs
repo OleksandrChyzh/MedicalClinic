@@ -10,7 +10,8 @@ public class AppointmentProfile : Profile
         // 1. Створення запису (DTO -> Entity)
         this.CreateMap<AddAppointmentDTO, Appointment>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => AppointmentStatus.CREATED))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+            // Використовуємо Unspecified замість UtcNow
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified)));
 
         // 2. Отримання запису (Entity -> DTO)
         this.CreateMap<Appointment, GetAppointmentDTO>()

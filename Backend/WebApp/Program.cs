@@ -8,7 +8,7 @@ using DataGenerator;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. РЕЄСТРАЦІЯ СЕРВІСІВ (BLL, DAL, Identity, AutoMapper)
+// 1. РЕЄСТРАЦІЯ СЕРВІСІВ
 builder.Services.ConfigureServices(builder.Configuration);
 
 // 2. НАЛАШТУВАННЯ SWAGGER
@@ -22,7 +22,6 @@ builder.Services.AddSwaggerGen(static options =>
         Description = "API для керування медичним центром (Пацієнти, Лікарі, Записи, Відгуки)"
     });
 
-    // Додаємо підтримку JWT токенів у інтерфейсі Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Введіть токен у форматі: Bearer {ваш_токен}",
@@ -46,7 +45,7 @@ builder.Services.AddSwaggerGen(static options =>
 
 var app = builder.Build();
 
-// 3. БЛОК ГЕНЕРАЦІЇ ДАНИХ (SEEDING)
+// 3. БЛОК ГЕНЕРАЦІЇ ДАНИХ ТА МІГРАЦІЙ
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -56,35 +55,33 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-        // Автоматичне застосування міграцій при старті
+        // Міграції залишаємо, щоб база завжди була актуальною
         await context.Database.MigrateAsync();
 
-        // Запуск твоїх генераторів
+        // ЗМІНЕНО: Коментуємо виклик сідерів, щоб не спамило в консоль і швидше запускалось
         await DbSeeder.SeedAllAsync(context, userManager, roleManager);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogCritical(ex, "Критична помилка під час заповнення бази даних. Додаток зупинено.");
+        logger.LogCritical(ex, "Критична помилка під час оновлення бази даних. Додаток зупинено.");
         throw;
     }
 }
 
-// 4. КОНФІГУРАЦІЯ HTTP-PIPELINE (Middleware)
+// 4. КОНФІГУРАЦІЯ HTTP-PIPELINE
 if (app.Environment.IsDevelopment())
 {
-    // Включаємо генерацію специфікації та UI
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Medical API v1");
-        options.RoutePrefix = "swagger"; // Swagger буде доступний за адресою /swagger
+        options.RoutePrefix = "swagger";
     });
 }
 
 app.UseHttpsRedirection();
 
-// Важливо: Authentication ЗАВЖДИ перед Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

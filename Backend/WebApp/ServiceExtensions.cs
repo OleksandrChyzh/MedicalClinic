@@ -7,6 +7,9 @@ using DAL.Entities;
 using DAL.Interfaces;
 using DAL;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer; // ДОДАНО
+using Microsoft.IdentityModel.Tokens; // ДОДАНО
+using System.Text; // ДОДАНО
 
 namespace WebApp;
 
@@ -19,17 +22,42 @@ public static class ServiceExtensions
             options.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
         });
 
-        // 2. РЕЄСТРАЦІЯ IDENTITY (Цього не вистачало для UserManager)
+        // 1. РЕЄСТРАЦІЯ IDENTITY
         services.AddIdentity<User, IdentityRole<int>>(options =>
         {
-            options.Password.RequireDigit = false; // Налаштування за бажанням
+            options.Password.RequireDigit = false;
             options.Password.RequiredLength = 6;
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
-        // 3. РЕЄСТРАЦІЯ UNIT OF WORK (Цього не вистачало для BLL сервісів)
-        // Заміни UnitOfWork на назву свого класу реалізації, якщо вона інша
+        // 2. РЕЄСТРАЦІЯ JWT АВТЕНТИФІКАЦІЇ (НОВИЙ БЛОК)
+        var jwtSettings = configuration.GetSection("Jwt");
+        var secretKey = jwtSettings["Key"];
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.RequireHttpsMetadata = false; // Для розробки можна false
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
+            };
+        });
+
+        // 3. РЕЄСТРАЦІЯ UNIT OF WORK ТА ІНШИХ СЕРВІСІВ
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddControllers();
@@ -37,6 +65,7 @@ public static class ServiceExtensions
         {
             config.AddMaps(typeof(UserProfile).Assembly);
         });
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDirectionService, DirectionService>();

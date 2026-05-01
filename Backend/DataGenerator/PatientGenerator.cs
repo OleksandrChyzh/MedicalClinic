@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataGenerator;
+
 public static class PatientGenerator
 {
     public static async Task GenerateAsync(DbContext context, UserManager<User> userManager)
@@ -39,12 +40,15 @@ public static class PatientGenerator
             var adultGenderEnum = faker.PickRandom<Bogus.DataSets.Name.Gender>();
             var adultGenderString = adultGenderEnum == Bogus.DataSets.Name.Gender.Male ? "Male" : "Female";
 
+            // ЗМІНЕНО: Використовуємо DateTime.Now та Unspecified
+            var adultBirthDate = faker.Date.Past(62, DateTime.Now.AddYears(-18)).Date;
+
             patientsToAdd.Add(new Patient
             {
                 UserId = user.Id,
                 FirstName = faker.Name.FirstName(adultGenderEnum),
                 LastName = faker.Name.LastName(adultGenderEnum),
-                BirthDate = faker.Date.Past(62, DateTime.UtcNow.AddYears(-18)).Date.ToUniversalTime(),
+                BirthDate = DateTime.SpecifyKind(adultBirthDate, DateTimeKind.Unspecified),
                 Gender = adultGenderString
             });
 
@@ -60,12 +64,16 @@ public static class PatientGenerator
                     }
 
                     var kidGenderEnum = faker.PickRandom<Bogus.DataSets.Name.Gender>();
+
+                    // ЗМІНЕНО: Використовуємо DateTime.Now та Unspecified
+                    var kidBirthDate = faker.Date.Past(17, DateTime.Now).Date;
+
                     patientsToAdd.Add(new Patient
                     {
                         UserId = user.Id,
                         FirstName = faker.Name.FirstName(kidGenderEnum),
                         LastName = faker.Name.LastName(kidGenderEnum),
-                        BirthDate = faker.Date.Past(17, DateTime.UtcNow).Date.ToUniversalTime(),
+                        BirthDate = DateTime.SpecifyKind(kidBirthDate, DateTimeKind.Unspecified),
                         Gender = kidGenderEnum == Bogus.DataSets.Name.Gender.Male ? "Male" : "Female"
                     });
                 }
@@ -76,7 +84,7 @@ public static class PatientGenerator
         {
             await context.Set<Patient>().AddRangeAsync(patientsToAdd);
             await context.SaveChangesAsync();
-            Console.WriteLine($"✅ Догенеровано {patientsToAdd.Count} нових профілів пацієнтів. Загалом тепер: {currentCount + patientsToAdd.Count}");
+            Console.WriteLine($"✅ Догенеровано {patientsToAdd.Count} нових профілів пацієнтів (без часових поясів). Загалом тепер: {currentCount + patientsToAdd.Count}");
         }
     }
 }

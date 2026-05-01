@@ -24,12 +24,12 @@ public class AuthService(
         // Твій кастомний обробник помилок, про який ти згадував
 
         // Призначаємо роль за замовчуванням
-        await userManager.AddToRoleAsync(user, "Patient");
+        await userManager.AddToRoleAsync(user, "User");
 
         return new AuthResponse
         {
             Token = await this.GenerateJwtToken(user),
-            Roles = new[] { "Patient" }
+            Roles = new[] { "User" }
         };
     }
 

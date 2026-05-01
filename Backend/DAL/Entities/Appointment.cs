@@ -12,8 +12,7 @@ public class Appointment : IBaseEntity
 
     public int DurationMinutes { get; set; } // Скільки триває запис
     public AppointmentStatus Status { get; set; } = AppointmentStatus.CREATED;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+    public DateTime CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
     public virtual Patient Patient { get; set; } = null!;
     public virtual User User { get; set; } = null!;
     public virtual Doctor Doctor { get; set; } = null!;

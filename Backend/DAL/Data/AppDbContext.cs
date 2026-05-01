@@ -106,7 +106,12 @@ public class AppDbContext : IdentityDbContext<
             b.HasKey(p => p.Id);
             b.Property(p => p.LastName).IsRequired().HasMaxLength(100);
             b.Property(p => p.FirstName).IsRequired().HasMaxLength(100);
-            b.Property(p => p.BirthDate).IsRequired();
+
+            // ДОДАНО: Явно кажемо базі, що ця колонка БЕЗ часового поясу
+            b.Property(p => p.BirthDate)
+                .IsRequired()
+                .HasColumnType("timestamp without time zone");
+
             b.Property(p => p.Gender).IsRequired().HasMaxLength(10);
         });
 
@@ -167,31 +172,45 @@ public class AppDbContext : IdentityDbContext<
         {
             b.ToTable("Appointments", t =>
             {
-                t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= NOW()");
+                // ЗМІНЕНО: Використовуємо LOCALTIMESTAMP замість NOW(), бо колонка тепер без часового поясу
+                t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= LOCALTIMESTAMP");
+
                 // НОВА ПЕРЕВІРКА: Тривалість прийому має бути більше нуля
                 t.HasCheckConstraint("CHK_Appointment_Duration_Positive", "\"DurationMinutes\" > 0");
             });
 
             b.HasKey(a => a.Id);
 
+            // ЗМІНЕНО: Явно вказуємо, що дата прийому БЕЗ часового поясу
+            b.Property(a => a.AppointmentDate)
+                .IsRequired()
+                .HasColumnType("timestamp without time zone");
+
             // Явно вказуємо нове поле
             b.Property(a => a.DurationMinutes)
                 .IsRequired()
-                .HasDefaultValue(30); // Можеш встановити 30 хв за замовчуванням (опціонально)
+                .HasDefaultValue(30);
 
-            b.Property(a => a.Status).IsRequired().HasConversion<string>();
-            b.Property(a => a.CreatedAt).HasDefaultValueSql("NOW()").IsRequired();
+            b.Property(a => a.Status)
+                .IsRequired()
+                .HasConversion<string>();
+
+            // ЗМІНЕНО: Вказуємо тип колонки та змінюємо NOW() на LOCALTIMESTAMP
+            b.Property(a => a.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("LOCALTIMESTAMP")
+                .IsRequired();
 
             // Явне прописання зв'язків
             b.HasOne(a => a.Patient)
                 .WithMany(p => p.Appointments)
                 .HasForeignKey(a => a.PatientId)
-                .OnDelete(DeleteBehavior.Cascade); // Якщо видаляємо профіль пацієнта - видаляємо записи
+                .OnDelete(DeleteBehavior.Cascade);
 
             b.HasOne(a => a.Doctor)
                 .WithMany(d => d.Appointments)
                 .HasForeignKey(a => a.DoctorId)
-                .OnDelete(DeleteBehavior.Restrict); // Забороняємо видаляти лікаря, якщо є записи
+                .OnDelete(DeleteBehavior.Restrict);
 
             b.HasOne(a => a.Service)
                 .WithMany(s => s.Appointments)
@@ -202,7 +221,6 @@ public class AppDbContext : IdentityDbContext<
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
         // ============ REVIEWS ============
         builder.Entity<Review>(b =>
         {

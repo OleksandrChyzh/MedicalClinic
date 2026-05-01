@@ -43,17 +43,22 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
             throw new UnauthorizedAccessException("Ви не можете записувати цього пацієнта.");
         }
 
-        // Перевірка існування послуги (лікаря перевіримо в ValidateSlotAvailability)
+        // Перевірка існування послуги
         var serviceExists = await unitOfWork.ServiceRepository.GetByIdAsync(dto.ServiceId) != null;
         if (!serviceExists)
         {
             throw new KeyNotFoundException("Послугу не знайдено.");
         }
 
-        // ВАЖЛИВО: Викликаємо спільну валідацію розкладу
+        // Перевірка розкладу
         await ValidateSlotAvailability(dto);
 
         var appointment = mapper.Map<Appointment>(dto);
+
+        // ФІКС ПОМИЛКИ NPGSQL: 
+        // Жорстко прибираємо часовий пояс (UTC), щоб БД прийняла дату в колонку "timestamp without time zone"
+        appointment.AppointmentDate = DateTime.SpecifyKind(appointment.AppointmentDate, DateTimeKind.Unspecified);
+
         appointment.UserId = userId; // Прив'язуємо до того, хто створив запис
         appointment.Status = AppointmentStatus.CREATED;
 
@@ -115,7 +120,21 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
     {
         var start = dto.AppointmentDate;
         var end = start.AddMinutes(dto.DurationMinutes);
-        var day = start.DayOfWeek.ToString();
+
+        // 1. Створюємо словник для перекладу днів тижня на українську
+        var dayOfWeekDict = new Dictionary<DayOfWeek, string>
+    {
+        { DayOfWeek.Monday, "Понеділок" },
+        { DayOfWeek.Tuesday, "Вівторок" },
+        { DayOfWeek.Wednesday, "Середа" },
+        { DayOfWeek.Thursday, "Четвер" },
+        { DayOfWeek.Friday, "П'ятниця" },
+        { DayOfWeek.Saturday, "Субота" },
+        { DayOfWeek.Sunday, "Неділя" }
+    };
+
+        // 2. Отримуємо правильний український день тижня
+        var day = dayOfWeekDict[start.DayOfWeek];
 
         // Перевірка робочого графіку (Schedule)
         var schedule = await unitOfWork.ScheduleRepository.GetFirstOrDefaultAsync(
@@ -123,7 +142,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
 
         if (schedule == null)
         {
-            throw new Exception("Лікар не працює в цей день.");
+            throw new Exception($"Лікар не працює в цей день ({day})."); // Додав вивід дня для зручності
         }
 
         var workStart = TimeOnly.FromDateTime(start);
