@@ -1,0 +1,30 @@
+<header class="navbar">
+  <div class="navbar__container">
+
+    <a routerLink="/" class="navbar__logo">
+      <span class="logo-text">MediClinic</span>
+    </a>
+
+    <nav class="navbar__nav">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Головна</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/emergency" routerLinkActive="active">Невідкладна допомога</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/services" routerLinkActive="active">Послуги</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/contacts" routerLinkActive="active">Контакти</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="navbar__actions">
+      <a routerLink="/login" class="btn btn-primary">Вхід</a>
+    </div>
+
+  </div>
+</header>

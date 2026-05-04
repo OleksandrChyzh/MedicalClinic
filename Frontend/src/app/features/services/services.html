@@ -1,0 +1,72 @@
+<section class="services-page">
+  <div class="services-page__container">
+
+    <div class="services-page__header">
+      <h1 class="title">Наші медичні послуги</h1>
+      <p class="subtitle">Оберіть потрібний напрямок або тип послуги для швидкого пошуку.</p>
+    </div>
+
+    <div class="filter-panel card">
+      <div class="filter-group">
+        <label for="direction">Напрямок:</label>
+        <select id="direction" [(ngModel)]="selectedDirectionId" (change)="applyFilters()" class="form-select">
+          <option [ngValue]="null">Всі напрямки</option>
+          @for (dir of directions; track dir.id) {
+            <option [ngValue]="dir.id">{{ dir.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="type">Тип послуги:</label>
+        <select id="type" [(ngModel)]="selectedTypeId" (change)="applyFilters()" class="form-select">
+          <option [ngValue]="null">Всі типи</option>
+          @for (type of serviceTypes; track type.id) {
+            <option [ngValue]="type.id">{{ type.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-outline" (click)="resetFilters()">Скинути фільтри</button>
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="loading-spinner">Завантаження послуг...</div>
+    } @else {
+      @if (services.length === 0) {
+        <div class="empty-state">
+          <span class="icon">🔍</span>
+          <h3>Послуг не знайдено</h3>
+          <p>Спробуйте змінити параметри фільтрації або скинути фільтри.</p>
+        </div>
+      } @else {
+        <div class="services-grid">
+          @for (service of services; track service.id) {
+            <div class="card service-card">
+              <div class="service-card__content">
+                <h3 class="service-name">{{ service.name }}</h3>
+                <p class="service-desc">{{ service.description || 'Опис відсутній' }}</p>
+
+                <div class="service-meta">
+                  <div class="rating">
+                    <span class="star">⭐</span>
+                    <span class="score">{{ service.averageRating }}</span>
+                    <span class="reviews">({{ service.reviewsCount }} відгуків)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="service-card__footer">
+                <div class="price">{{ service.price }} грн</div>
+                <button class="btn btn-primary btn-sm">Записатися</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+  </div>
+</section>

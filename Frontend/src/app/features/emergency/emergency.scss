@@ -1,0 +1,161 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-gentle {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+
+.emergency {
+  padding: 4rem 2rem;
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    max-width: 1280px;
+    width: 100%;
+    align-items: center;
+  }
+
+  &__visual {
+    animation: fadeIn 0.6s ease-out forwards;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Стилізація нової SVG ілюстрації */
+  &__illustration {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .svg-ambulance {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(var(--shadow-md));
+      animation: pulse-gentle 2s infinite alternate ease-in-out;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  &__badge {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  &__title {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+  }
+
+  &__description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  /* --- Стилізація блоку "Екстрений зв'язок" --- */
+  &__contact-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background-color: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid rgba(239, 68, 68, 0.15); /* Легка червона обводка для фокусу */
+    box-shadow: var(--shadow-md);
+    width: 100%;
+  }
+
+  .phone-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--danger);
+
+    .phone-icon {
+      font-size: 3.5rem;
+      animation: pulse-gentle 1s infinite alternate ease-in-out;
+    }
+
+    .phone-number {
+      font-size: 4.5rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 2px;
+      margin: 0;
+    }
+  }
+
+  .price-badge {
+    display: inline-flex;
+    background-color: var(--secondary);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+    align-self: flex-start;
+  }
+
+  /* --- Адаптивність (Mobile / Tablet) --- */
+  @media (max-width: 992px) {
+    &__container {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 3rem;
+    }
+
+    &__content {
+      align-items: center;
+    }
+
+    &__contact-block {
+      align-items: center;
+    }
+
+    .price-badge {
+      align-self: center;
+    }
+  }
+
+  @media (max-width: 576px) {
+    padding: 2rem 1rem;
+
+    &__title {
+      font-size: 2.2rem;
+    }
+
+    .phone-wrapper {
+      .phone-icon { font-size: 2.5rem; }
+      .phone-number { font-size: 3.5rem; }
+    }
+  }
+}

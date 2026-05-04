@@ -1,0 +1,151 @@
+/* --- Анімації появи --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero {
+  /* Задаємо сітку для розподілу на 2 колонки */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  min-height: calc(100vh - 72px); /* Займає всю висоту екрана за мінусом навігації */
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    /* Застосовуємо анімацію до всіх дочірніх елементів з різною затримкою */
+    > * {
+      opacity: 0;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  }
+
+  &__badge {
+    background-color: var(--secondary);
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation-delay: 0.1s;
+  }
+
+  &__title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    animation-delay: 0.2s;
+  }
+
+  &__description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    animation-delay: 0.3s;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    animation-delay: 0.4s;
+  }
+
+  &__visual {
+    opacity: 0;
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+
+  /* Стилізація абстрактного блоку-заглушки для зображення */
+  &__graphic {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-color) 100%);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--secondary);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Декоративне розмите сяйво (градієнт) */
+    .graphic-glow {
+      position: absolute;
+      top: -30%;
+      right: -30%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      opacity: 0.15;
+      filter: blur(40px);
+    }
+
+    /* Внутрішній контент заглушки */
+    .graphic-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.25rem;
+
+      .icon {
+        font-size: 3rem;
+      }
+    }
+  }
+
+  /* --- Адаптивність (Mobile / Tablet) --- */
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr; /* Одна колонка */
+    text-align: center;
+    padding: 3rem 1.5rem;
+    min-height: auto;
+
+    &__content {
+      align-items: center;
+    }
+
+    &__title {
+      font-size: 2.5rem;
+    }
+
+    &__actions {
+      justify-content: center;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    &__actions {
+      flex-direction: column; /* Кнопки в стовпчик на смартфонах */
+      width: 100%;
+
+      .btn {
+        width: 100%; /* Розтягуємо кнопки на всю ширину */
+      }
+    }
+  }
+}
