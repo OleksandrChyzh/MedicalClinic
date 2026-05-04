@@ -361,3 +361,26 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Angular specific
+/Frontend/dist/
+/Frontend/tmp/
+/Frontend/out-tsc/
+/Frontend/bazel-out/
+
+# Angular CLI cache
+/Frontend/.angular/
+
+# Node modules (на всякий випадок, з уточненням шляху)
+**/node_modules/
+
+# IDE files (WebStorm/VSCode)
+.idea/
+.vscode/
+*.swp
+*.patch
+*.diff
+
+# Operating System files
+Thumbs.db
+.DS_Store

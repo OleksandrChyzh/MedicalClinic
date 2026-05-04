@@ -22,6 +22,17 @@ public static class ServiceExtensions
             options.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
         });
 
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend", policy =>
+            {
+                policy.WithOrigins("http://localhost:4200") // Адреса твого Angular
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials(); // Важливо, якщо будеш передавати токени або кукі
+            });
+        });
+
         // 1. РЕЄСТРАЦІЯ IDENTITY
         services.AddIdentity<User, IdentityRole<int>>(options =>
         {

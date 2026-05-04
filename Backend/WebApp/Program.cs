@@ -59,7 +59,7 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
 
         // ЗМІНЕНО: Коментуємо виклик сідерів, щоб не спамило в консоль і швидше запускалось
-        await DbSeeder.SeedAllAsync(context, userManager, roleManager);
+        //await DbSeeder.SeedAllAsync(context, userManager, roleManager);
     }
     catch (Exception ex)
     {
@@ -81,6 +81,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
