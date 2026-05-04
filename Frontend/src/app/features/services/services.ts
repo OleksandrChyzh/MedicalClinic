@@ -1,66 +1,60 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClinicService } from '../../core/services/clinic.service';
 import { Direction, MedicalService, ServiceType } from '../../models/clinic.models';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-services',
   standalone: true,
-  imports: [FormsModule], // Потрібно для двосторонньої прив'язки фільтрів
+  imports: [FormsModule, RouterLink],
   templateUrl: './services.html',
   styleUrl: './services.scss'
 })
 export class ServicesComponent implements OnInit {
   private clinicService = inject(ClinicService);
 
-  // Списки для відображення
-  directions: Direction[] = [];
-  serviceTypes: ServiceType[] = [];
-  services: MedicalService[] = [];
+  // Перетворюємо наші масиви та змінні на Сигнали
+  directions = signal<Direction[]>([]);
+  serviceTypes = signal<ServiceType[]>([]);
+  services = signal<MedicalService[]>([]);
 
-  // Стан фільтрів
-  selectedDirectionId: number | null = null;
-  selectedTypeId: number | null = null;
+  selectedDirectionId = signal<number | null>(null);
+  selectedTypeId = signal<number | null>(null);
 
-  // Індикатор завантаження
-  isLoading: boolean = true;
+  isLoading = signal<boolean>(true);
 
   ngOnInit(): void {
     this.loadFilters();
     this.loadServices();
   }
 
-  // Завантажуємо довідники для випадаючих списків
   private loadFilters(): void {
-    this.clinicService.getDirections().subscribe(data => this.directions = data);
-    this.clinicService.getServiceTypes().subscribe(data => this.serviceTypes = data);
+    // Оновлюємо значення сигналів через метод .set()
+    this.clinicService.getDirections().subscribe(data => this.directions.set(data));
+    this.clinicService.getServiceTypes().subscribe(data => this.serviceTypes.set(data));
   }
 
-  // Завантажуємо послуги (з фільтрами або без)
   loadServices(): void {
-    this.isLoading = true;
-    this.clinicService.getServices(this.selectedDirectionId, this.selectedTypeId)
+    this.isLoading.set(true);
+    // Щоб отримати значення з сигналу, викликаємо його як функцію: this.selectedDirectionId()
+    this.clinicService.getServices(this.selectedDirectionId(), this.selectedTypeId())
       .subscribe({
         next: (data) => {
-          this.services = data;
-          this.isLoading = false;
+          this.services.set(data);
+          this.isLoading.set(false);
         },
         error: (err) => {
           console.error('Помилка завантаження послуг', err);
-          this.isLoading = false;
+          this.isLoading.set(false);
         }
       });
   }
 
-  // Викликається при зміні значення у <select>
-  applyFilters(): void {
-    this.loadServices();
-  }
-
   // Скидання фільтрів
   resetFilters(): void {
-    this.selectedDirectionId = null;
-    this.selectedTypeId = null;
+    this.selectedDirectionId.set(null);
+    this.selectedTypeId.set(null);
     this.loadServices();
   }
 }

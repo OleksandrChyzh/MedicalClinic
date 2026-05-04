@@ -21,8 +21,8 @@ public class ServiceProfile : Profile
 
             // Рахуємо середній рейтинг (з перевіркою, щоб не було ділення на нуль)
             .ForMember(dest => dest.AverageRating,
-                       opt => opt.MapFrom(src => src.Reviews.Any()
-                                                 ? src.Reviews.Average(r => r.Rating)
-                                                 : 0.0));
+               opt => opt.MapFrom(src => src.Reviews.Any()
+                                          ? Math.Round(src.Reviews.Average(r => r.Rating), 1)
+                                          : 0.0));
     }
 }

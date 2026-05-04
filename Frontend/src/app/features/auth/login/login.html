@@ -1,1 +1,61 @@
-<p>login works!</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Вітаємо знову!</h2>
+      <p>Увійдіть у свій кабінет MedicClinic</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label>Email</label>
+        <div class="input-wrapper">
+          <span class="icon">✉️</span>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="example@mail.com"
+            [class.error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+        </div>
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['required']) {
+          <small class="error-text">Email є обов'язковим</small>
+        }
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.errors?.['email']) {
+          <small class="error-text">Невірний формат email</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Пароль</label>
+        <div class="input-wrapper">
+          <span class="icon">🔒</span>
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            [class.error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+        </div>
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+          <small class="error-text">Введіть пароль (мін. 6 символів)</small>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span> Завантаження...
+        } @else {
+          Увійти
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Ще не маєте акаунту? <a routerLink="/register">Зареєструватися</a></p>
+    </div>
+  </div>
+</div>

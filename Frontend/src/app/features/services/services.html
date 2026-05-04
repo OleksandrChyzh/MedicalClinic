@@ -9,9 +9,13 @@
     <div class="filter-panel card">
       <div class="filter-group">
         <label for="direction">Напрямок:</label>
-        <select id="direction" [(ngModel)]="selectedDirectionId" (change)="applyFilters()" class="form-select">
+        <select
+          id="direction"
+          [ngModel]="selectedDirectionId()"
+          (ngModelChange)="selectedDirectionId.set($event); loadServices()"
+          class="form-select">
           <option [ngValue]="null">Всі напрямки</option>
-          @for (dir of directions; track dir.id) {
+          @for (dir of directions(); track dir.id) {
             <option [ngValue]="dir.id">{{ dir.name }}</option>
           }
         </select>
@@ -19,9 +23,13 @@
 
       <div class="filter-group">
         <label for="type">Тип послуги:</label>
-        <select id="type" [(ngModel)]="selectedTypeId" (change)="applyFilters()" class="form-select">
+        <select
+          id="type"
+          [ngModel]="selectedTypeId()"
+          (ngModelChange)="selectedTypeId.set($event); loadServices()"
+          class="form-select">
           <option [ngValue]="null">Всі типи</option>
-          @for (type of serviceTypes; track type.id) {
+          @for (type of serviceTypes(); track type.id) {
             <option [ngValue]="type.id">{{ type.name }}</option>
           }
         </select>
@@ -32,10 +40,10 @@
       </div>
     </div>
 
-    @if (isLoading) {
+    @if (isLoading()) {
       <div class="loading-spinner">Завантаження послуг...</div>
     } @else {
-      @if (services.length === 0) {
+      @if (services().length === 0) {
         <div class="empty-state">
           <span class="icon">🔍</span>
           <h3>Послуг не знайдено</h3>
@@ -43,7 +51,7 @@
         </div>
       } @else {
         <div class="services-grid">
-          @for (service of services; track service.id) {
+          @for (service of services(); track service.id) {
             <div class="card service-card">
               <div class="service-card__content">
                 <h3 class="service-name">{{ service.name }}</h3>
@@ -60,7 +68,7 @@
 
               <div class="service-card__footer">
                 <div class="price">{{ service.price }} грн</div>
-                <button class="btn btn-primary btn-sm">Записатися</button>
+                <button routerLink="/login" class="btn btn-primary btn-sm">Записатися</button>
               </div>
             </div>
           }
