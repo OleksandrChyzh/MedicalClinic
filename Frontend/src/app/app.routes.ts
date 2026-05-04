@@ -30,6 +30,11 @@ export const routes: Routes = [
     title: 'Вхід в систему'
   },
   {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register').then(m => m.RegisterComponent),
+    title: 'Вхід в систему'
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full'

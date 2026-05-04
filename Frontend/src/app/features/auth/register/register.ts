@@ -5,13 +5,13 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './login.html',
-  styleUrl: './login.scss'
+  templateUrl: './register.html',
+  styleUrl: '../login/login.scss' // Перевикористовуємо дизайн логіну
 })
-export class LoginComponent {
+export class RegisterComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -19,22 +19,22 @@ export class LoginComponent {
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
 
-  loginForm = this.fb.group({
+  registerForm = this.fb.group({
+    userName: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    phoneNumber: ['']
   });
 
   onSubmit(): void {
-    if (this.loginForm.invalid) return;
+    if (this.registerForm.invalid) return;
 
     this.isLoading.set(true);
-    this.errorMessage.set(null);
-
-    this.authService.login(this.loginForm.getRawValue() as any).subscribe({
+    this.authService.register(this.registerForm.getRawValue() as any).subscribe({
       next: () => this.router.navigate(['/']),
-      error: (err) => {
+      error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.status === 401 ? 'Невірний email або пароль' : 'Помилка сервера');
+        this.errorMessage.set('Помилка реєстрації. Можливо, такий email вже існує.');
       }
     });
   }

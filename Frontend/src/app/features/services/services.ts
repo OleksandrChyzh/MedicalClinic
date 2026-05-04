@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClinicService } from '../../core/services/clinic.service';
-import { Direction, MedicalService, ServiceType } from '../../models/clinic.models';
+import { Direction, MedicalService, ServiceType } from '../../models/service.models';
 import {RouterLink} from '@angular/router';
 
 @Component({
