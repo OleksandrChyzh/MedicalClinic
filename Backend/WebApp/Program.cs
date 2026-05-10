@@ -69,7 +69,11 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
 // 4. КОНФІГУРАЦІЯ HTTP-PIPELINE
+
+app.UseMiddleware<WebApp.Middlewares.GlobalExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
