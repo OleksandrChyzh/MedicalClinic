@@ -82,10 +82,13 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+
+  align-items: start;
 }
 
 /* --- Картка послуги --- */
 .service-card {
+  height: max-content;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -188,4 +191,101 @@
   .filter-panel { flex-direction: column; align-items: stretch; }
   .filter-group { min-width: 100%; }
   .filter-actions .btn { width: 100%; }
+}
+
+.actions-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+// Стилі для секції відгуків
+.reviews-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.reviews-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 1rem 0;
+
+  .spinner-small {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(14, 165, 233, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.no-reviews {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 250px; // Обмежуємо висоту
+  overflow-y: auto;  // Додаємо скрол, якщо відгуків багато
+  padding-right: 0.5rem;
+
+  // Стилізація скролбара
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+}
+
+.review-item {
+  background: var(--bg-soft);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    .review-date {
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+  }
+
+  .stars {
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .comment {
+    font-size: 0.85rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -52,7 +52,8 @@
       } @else {
         <div class="services-grid">
           @for (service of services(); track service.id) {
-            <div class="card service-card">
+            <div class="card service-card" style="position: relative;">
+
               <div class="service-card__content">
                 <h3 class="service-name">{{ service.name }}</h3>
                 <p class="service-desc">{{ service.description || 'Опис відсутній' }}</p>
@@ -68,8 +69,48 @@
 
               <div class="service-card__footer">
                 <div class="price">{{ service.price }} грн</div>
-                <button routerLink="/login" class="btn btn-primary btn-sm">Записатися</button>
+
+                <div class="actions-group">
+                  <button class="btn btn-outline btn-sm" (click)="toggleReviews(service.id)">
+                    {{ expandedServices().has(service.id) ? 'Сховати' : 'Відгуки' }}
+                  </button>
+                  <button routerLink="/login" class="btn btn-primary btn-sm">Записатися</button>
+                </div>
               </div>
+
+              @if (expandedServices().has(service.id)) {
+                <div class="reviews-section reviews-section--overlay">
+
+                  @if (isLoadingReviews().has(service.id)) {
+                    <div class="reviews-loading">
+                      <span class="spinner-small"></span> Завантаження...
+                    </div>
+                  } @else {
+
+                    @if (serviceReviews().get(service.id); as reviews) {
+                      @if (reviews.length === 0) {
+                        <p class="no-reviews">Для цієї послуги ще немає відгуків.</p>
+                      } @else {
+                        <div class="reviews-list">
+                          @for (review of reviews; track review.id) {
+                            <div class="review-item">
+                              <div class="review-header">
+                                <span class="user-name">{{ review.userName }}</span>
+                                <span class="review-date">{{ review.createdAt | date:'shortDate' }}</span>
+                              </div>
+                              <div class="stars">{{ getStars(review.rating) }}</div>
+                              @if (review.comment) {
+                                <p class="comment">{{ review.comment }}</p>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              }
+
             </div>
           }
         </div>
