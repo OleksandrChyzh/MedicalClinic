@@ -1,20 +1,18 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
-import { UserLayoutComponent } from './features/user/layout/user-layout/user-layout';
 import { ProfileComponent } from './features/user/pages/profile/profile';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // ==========================================
-  // ПУБЛІЧНА ГІЛКА (використовує MainLayout з Navbar)
-  // ==========================================
   {
     path: '',
-    component: MainLayoutComponent,
+    component: MainLayoutComponent, // <--- ЄДИНИЙ Layout на весь додаток
     children: [
+      // ==========================================
+      // ПУБЛІЧНІ СТОРІНКИ
+      // ==========================================
       {
         path: '',
-        // Ліниве завантаження компонента
         loadComponent: () => import('./features/home/home').then(m => m.HomeComponent),
         title: 'Головна - MediClinic'
       },
@@ -41,27 +39,26 @@ export const routes: Routes = [
       {
         path: 'register',
         loadComponent: () => import('./features/auth/register/register').then(m => m.RegisterComponent),
-        title: 'Реєстрація' // Виправлено назву тайтлу
+        title: 'Реєстрація'
+      },
+
+      // ==========================================
+      // ПРИВАТНІ СТОРІНКИ (Тепер вони ТУТ, всередині MainLayout)
+      // ==========================================
+      {
+        path: 'user',
+        canActivate: [authGuard], // Захищаємо цю групу
+        children: [
+          { path: '', redirectTo: 'profile', pathMatch: 'full' },
+          { path: 'profile', component: ProfileComponent },
+          // У майбутньому тут будуть інші захищені сторінки
+        ]
       }
     ]
   },
 
   // ==========================================
-  // ПРИВАТНА ГІЛКА (використовує UserLayout з Navbar та Sidebar)
-  // ==========================================
-  {
-    path: 'user',
-    component: UserLayoutComponent,
-    canActivate: [authGuard], // Захист маршруту
-    children: [
-      { path: '', redirectTo: 'profile', pathMatch: 'full' },
-      { path: 'profile', component: ProfileComponent },
-      // У майбутньому тут будуть: { path: 'appointments', component: AppointmentsComponent }
-    ]
-  },
-
-  // ==========================================
-  // FALLBACK МАРШРУТ (Завжди в кінці)
+  // FALLBACK МАРШРУТ
   // ==========================================
   {
     path: '**',

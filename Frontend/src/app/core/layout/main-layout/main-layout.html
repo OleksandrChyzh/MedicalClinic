@@ -1,0 +1,26 @@
+<app-navbar></app-navbar>
+
+<div class="main-shell">
+  @if (isLoggedIn()) {
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <a routerLink="/user/profile" routerLinkActive="active" class="menu-item">
+          <span class="icon">👤</span> Профіль
+        </a>
+        <a routerLink="/user/appointments" routerLinkActive="active" class="menu-item">
+          <span class="icon">📅</span> Мої записи
+        </a>
+        <a routerLink="/user/medical-record" routerLinkActive="active" class="menu-item">
+          <span class="icon">🗂️</span> Медична карта
+        </a>
+        <a routerLink="/user/settings" routerLinkActive="active" class="menu-item">
+          <span class="icon">⚙️</span> Налаштування
+        </a>
+      </div>
+    </aside>
+  }
+
+  <main class="shell-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

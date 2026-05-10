@@ -1,16 +1,18 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from '../../components/navbar/navbar'; // Перевір свій шлях
+import { Component, inject } from '@angular/core';
+import { RouterOutlet, RouterModule } from '@angular/router'; // Додано RouterModule
+import { NavbarComponent } from '../../components/navbar/navbar';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent],
-  template: `
-    <app-navbar></app-navbar>
-    <main>
-      <router-outlet></router-outlet>
-    </main>
-  `
+  imports: [RouterOutlet, RouterModule, NavbarComponent], // Додано RouterModule сюди
+  templateUrl: './main-layout.html', // Підключаємо твій HTML-файл
+  styleUrl: './main-layout.scss'     // Підключаємо твій SCSS-файл
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  private authService = inject(AuthService);
+
+  // Отримуємо стан авторизації (це сигнал)
+  isLoggedIn = this.authService.isLoggedIn;
+}

@@ -1,0 +1,64 @@
+<h2>Мій профіль</h2>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <p>Завантаження даних профілю...</p>
+  </div>
+} @else {
+  @if (profile(); as userData) {
+    <div class="profile-card">
+
+      @if (!isEditing()) {
+        <div class="card-header">
+          <div class="avatar-circle">
+            {{ getInitials(userData.userName) }}
+          </div>
+
+          <div class="user-details">
+            <h3>{{ userData.userName }}</h3>
+            <p class="role">Користувач</p>
+            <p class="contact-info">{{ userData.email }}</p>
+
+            @if (userData.phoneNumber) {
+              <p class="contact-info text-muted">{{ userData.phoneNumber }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline" (click)="startEditing()">Редагувати дані</button>
+        </div>
+      }
+      @else {
+        <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="edit-form">
+          <div class="form-group">
+            <label>Ім'я користувача</label>
+            <input type="text" formControlName="userName" class="form-control" placeholder="Введіть ім'я">
+          </div>
+
+          <div class="form-group">
+            <label>Номер телефону</label>
+            <input type="text" formControlName="phoneNumber" class="form-control" placeholder="+380...">
+          </div>
+
+          <div class="form-group">
+            <label>Новий пароль (необов'язково)</label>
+            <input type="password" formControlName="password" class="form-control" placeholder="Залиште пустим, якщо не змінюєте">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline cancel" (click)="cancelEditing()" [disabled]="isSaving()">Скасувати</button>
+            <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
+              {{ isSaving() ? 'Збереження...' : 'Зберегти зміни' }}
+            </button>
+          </div>
+        </form>
+      }
+
+    </div>
+  } @else {
+    <div class="error-state">
+      <p>Не вдалося завантажити дані. Спробуйте оновити сторінку.</p>
+    </div>
+  }
+}

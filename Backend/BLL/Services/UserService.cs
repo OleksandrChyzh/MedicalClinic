@@ -34,6 +34,11 @@ public class UserService(UserManager<User> userManager, IMapper mapper) : IUserS
         // AutoMapper проігнорує null-значення завдяки твоєму налаштуванню.
         mapper.Map(dto, user);
 
+        if (string.IsNullOrEmpty(user.SecurityStamp))
+        {
+            user.SecurityStamp = Guid.NewGuid().ToString();
+        }
+
         // 2. Якщо користувач передав новий пароль, оновлюємо його окремо
         if (!string.IsNullOrEmpty(dto.Password))
         {
