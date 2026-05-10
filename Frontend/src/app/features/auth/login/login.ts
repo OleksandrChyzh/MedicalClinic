@@ -30,11 +30,34 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
+    // Використовуємо getRawValue() для отримання даних форми
     this.authService.login(this.loginForm.getRawValue() as any).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: (response) => {
+        this.isLoading.set(false);
+
+        // Отримуємо ролі з відповіді бекенду
+        const roles = response.roles || [];
+
+        // Логіка перенаправлення залежно від ролі
+        if (roles.includes('User')) {
+          this.router.navigate(['/user/profile']);
+        } else if (roles.includes('Admin')) {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          // Фолбек на головну, якщо ролі не визначені
+          this.router.navigate(['/']);
+        }
+      },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.status === 401 ? 'Невірний email або пароль' : 'Помилка сервера');
+        // Обробка помилок авторизації
+        if (err.status === 401) {
+          this.errorMessage.set('Невірний email або пароль');
+        } else if (err.status === 403) {
+          this.errorMessage.set('Доступ заборонено');
+        } else {
+          this.errorMessage.set('Помилка сервера. Спробуйте пізніше');
+        }
       }
     });
   }
