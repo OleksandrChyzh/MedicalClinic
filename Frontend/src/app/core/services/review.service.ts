@@ -13,4 +13,7 @@ export class ReviewService {
   getReviewsByService(serviceId: number): Observable<Review[]> {
     return this.http.get<Review[]>(`${this.apiUrl}/service/${serviceId}`);
   }
+  getReviewsByDoctor(doctorId: number): Observable<Review[]> {
+    return this.http.get<Review[]>(`${this.apiUrl}/doctor/${doctorId}`);
+  }
 }

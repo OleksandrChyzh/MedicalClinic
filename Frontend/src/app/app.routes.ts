@@ -33,6 +33,11 @@ export const routes: Routes = [
         title: 'Контакти'
       },
       {
+        path: 'doctors',
+        loadComponent: () => import('./features/doctors/doctors').then(m => m.DoctorsComponent),
+        title: 'Наші лікарі - MediClinic'
+      },
+      {
         path: 'login',
         loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent),
         title: 'Вхід в систему'

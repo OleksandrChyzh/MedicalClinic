@@ -16,11 +16,14 @@ public class DoctorService(
     IMapper mapper,
     UserManager<User> userManager) : IDoctorService
 {
-    public async Task<IEnumerable<GetDoctorDto>> GetAllDoctorsAsync()
+    public async Task<IEnumerable<GetDoctorDto>> GetAllDoctorsAsync(int? directionId)
     {
+        // Використовуємо filter для перевірки DirectionId
         var doctors = await unitOfWork.DoctorRepository.GetAllAsync(
+            filter: d => !directionId.HasValue || d.DirectionId == directionId.Value,
             includes: [d => d.Direction, d => d.User, d => d.Reviews]
         );
+
         return mapper.Map<IEnumerable<GetDoctorDto>>(doctors);
     }
 

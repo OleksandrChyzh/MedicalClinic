@@ -12,9 +12,10 @@ public class DoctorController(IDoctorService doctorService) : ControllerBase
     // Доступно всім (гостям і авторизованим)
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int? directionId)
     {
-        var doctors = await doctorService.GetAllDoctorsAsync();
+        // Передаємо параметр фільтрації в сервіс
+        var doctors = await doctorService.GetAllDoctorsAsync(directionId);
         return this.Ok(doctors);
     }
 

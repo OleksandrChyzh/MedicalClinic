@@ -1,0 +1,114 @@
+<section class="services-page">
+  <div class="services-page__container">
+
+    <div class="services-page__header">
+      <h1 class="title">Наші лікарі</h1>
+      <p class="subtitle">Оберіть спеціаліста для отримання кваліфікованої допомоги.</p>
+    </div>
+
+    <div class="filter-panel card">
+      <div class="filter-group">
+        <label for="direction">Напрямок:</label>
+        <select
+          id="direction"
+          [ngModel]="selectedDirectionId()"
+          (ngModelChange)="selectedDirectionId.set($event); loadDoctors()"
+          class="form-select">
+          <option [ngValue]="null">Всі напрямки</option>
+          @for (dir of directions(); track dir.id) {
+            <option [ngValue]="dir.id">{{ dir.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-outline" (click)="resetFilter()">Скинути фільтри</button>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-spinner">Завантаження спеціалістів...</div>
+    } @else {
+      @if (doctors().length === 0) {
+        <div class="empty-state">
+          <span class="icon">🔍</span>
+          <h3>Лікарів не знайдено</h3>
+          <p>Спробуйте змінити параметри фільтрації або скинути фільтри.</p>
+        </div>
+      } @else {
+        <div class="services-grid">
+          @for (doc of doctors(); track doc.id) {
+            <div class="card service-card" style="position: relative;">
+
+              <div class="service-card__content">
+                <div class="direction-tag" style="font-size: 0.8rem; color: #0ea5e9; font-weight: 600; margin-bottom: 0.4rem;">
+                  {{ doc.directionName }}
+                </div>
+
+                <h3 class="service-name">{{ doc.fullName }}</h3>
+
+                <p class="experience" style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">
+                  Досвід: {{ doc.experienceYears }} років
+                </p>
+
+                <p class="service-desc">{{ doc.description || 'Опис відсутній' }}</p>
+
+                <div class="service-meta">
+                  <div class="rating">
+                    <span class="star">⭐</span>
+                    <span class="score">{{ doc.averageRating }}</span>
+                    <span class="reviews">({{ doc.reviewsCount }} відгуків)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="service-card__footer" style="justify-content: flex-end;">
+                <div class="actions-group">
+                  <button class="btn btn-outline btn-sm" (click)="toggleReviews(doc.id)">
+                    {{ expandedDoctors().has(doc.id) ? 'Сховати' : 'Відгуки' }}
+                  </button>
+                  <button routerLink="/register" class="btn btn-primary btn-sm">Записатися</button>
+                </div>
+              </div>
+
+              @if (expandedDoctors().has(doc.id)) {
+                <div class="reviews-section reviews-section--overlay">
+
+                  @if (isLoadingReviews().has(doc.id)) {
+                    <div class="reviews-loading">
+                      <span class="spinner-small"></span> Завантаження...
+                    </div>
+                  } @else {
+
+                    @if (doctorReviews().get(doc.id); as reviews) {
+                      @if (reviews.length === 0) {
+                        <p class="no-reviews">Для цього лікаря ще немає відгуків.</p>
+                      } @else {
+                        <div class="reviews-list">
+                          @for (review of reviews; track review.id) {
+                            <div class="review-item">
+                              <div class="review-header">
+                                <span class="user-name">{{ review.userName || 'Анонімний пацієнт' }}</span>
+                                <span class="review-date">{{ review.createdAt | date:'shortDate' }}</span>
+                              </div>
+                              <div class="stars">{{ getStars(review.rating) }}</div>
+                              @if (review.comment) {
+                                <p class="comment">{{ review.comment }}</p>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+      }
+    }
+
+  </div>
+</section>
