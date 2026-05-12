@@ -1,0 +1,78 @@
+<div class="patients-header">
+  <h2>Мої пацієнти</h2>
+  <button class="btn btn-primary" (click)="toggleAddForm()">
+    {{ isAdding() ? 'Скасувати' : '+ Додати пацієнта' }}
+  </button>
+</div>
+
+@if (isAdding()) {
+  <div class="add-patient-card">
+    <h3>Новий пацієнт</h3>
+    <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="edit-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Прізвище</label>
+          <input type="text" formControlName="lastName" class="form-control" placeholder="Введіть прізвище">
+        </div>
+        <div class="form-group">
+          <label>Ім'я</label>
+          <input type="text" formControlName="firstName" class="form-control" placeholder="Введіть ім'я">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Дата народження</label>
+          <input type="date" formControlName="birthDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Стать</label>
+          <select formControlName="gender" class="form-control">
+            <option value="" disabled selected>Оберіть стать</option>
+            <option value="Male">Чоловіча</option>
+            <option value="Female">Жіноча</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="addForm.invalid || isSaving()">
+          {{ isSaving() ? 'Збереження...' : 'Зберегти' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-state">Завантаження списку пацієнтів...</div>
+} @else {
+  @if (patients().length === 0) {
+    <div class="empty-state">
+      <p>У вас ще немає доданих пацієнтів.</p>
+    </div>
+  } @else {
+    <div class="patients-grid">
+      @for (patient of patients(); track patient.id) {
+        <div class="patient-card">
+          <div class="card-content">
+            <h4>{{ patient.fullName }}</h4>
+            <p class="details">
+              <span>🎂 Вік: {{ patient.age }} років</span>
+              <span>👤 Стать: {{ patient.gender === 'Male' ? 'Чол.' : 'Жін.' }}</span>
+            </p>
+            <div class="stats">
+              <span class="badge">Записів: {{ patient.appointmentsCount }}</span>
+              <span class="badge">Документів: {{ patient.recordsCount }}</span>
+            </div>
+          </div>
+          <div class="card-actions-right">
+            <button class="btn btn-danger-outline" (click)="deletePatient(patient.id)" title="Видалити">
+              Видалити
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
