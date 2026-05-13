@@ -67,7 +67,9 @@
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(doc.id)">
                     {{ expandedDoctors().has(doc.id) ? 'Сховати' : 'Відгуки' }}
                   </button>
-                  <button routerLink="/register" class="btn btn-primary btn-sm">Записатися</button>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="bookWithDoctor(doc)">
+                    Записатися
+                  </button>
                 </div>
               </div>
 

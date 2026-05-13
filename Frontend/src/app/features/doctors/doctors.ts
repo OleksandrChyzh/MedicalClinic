@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 // Сервіси
 import { DoctorService } from '../../core/services/doctor.service';
 import { ReviewService } from '../../core/services/review.service';
+import { AuthService } from '../../core/services/auth.service';
 
 // Моделі
 import { Doctor } from '../../models/doctor.model';
@@ -14,14 +15,15 @@ import { Review } from '../../models/review.models';
 @Component({
   selector: 'app-doctors',
   standalone: true,
-  // Додаємо CommonModule для пайпів (наприклад, date) та RouterLink для навігації
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './doctors.html',
   styleUrl: './doctors.scss'
 })
 export class DoctorsComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private reviewService = inject(ReviewService);
+  private router = inject(Router);
+  readonly auth = inject(AuthService);
 
   // --- СТАН ДЛЯ ЛІКАРІВ ---
   doctors = signal<Doctor[]>([]);
@@ -120,5 +122,16 @@ export class DoctorsComponent implements OnInit {
   getStars(rating: number): string {
     // Можна використовувати '⭐'.repeat(rating) або іконки
     return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  }
+
+  /** Без авторизації → логін; з авторизацією → форма нового запису з напрямком і лікарем (як на сторінці послуг). */
+  bookWithDoctor(doc: Doctor): void {
+    if (!this.auth.isLoggedIn()) {
+      void this.router.navigate(['/login']);
+      return;
+    }
+    void this.router.navigate(['/user/appointments'], {
+      queryParams: { bookDoctor: doc.id }
+    });
   }
 }

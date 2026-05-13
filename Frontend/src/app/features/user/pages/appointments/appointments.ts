@@ -18,11 +18,17 @@ import { Direction, MedicalService, ServiceType } from '../../../../models/servi
 import { Patient } from '../../../../models/patient.model';
 import { UserProfile } from '../../../../models/user.model';
 
-/** Дані з router state після «Записатися» на сторінці послуг */
+/** Дані після «Записатися» на сторінці «Послуги» */
 interface BookingPrefill {
   directionId: number;
   typeId: number | null;
   serviceId: number;
+}
+
+/** Дані після «Записатися» на сторінці «Лікарі» */
+interface DoctorBookingPrefill {
+  directionId: number;
+  doctorId: number;
 }
 
 @Component({
@@ -71,18 +77,50 @@ export class AppointmentsComponent implements OnInit {
     this.loadModalStaticData();
     this.loadUserProfile();
 
-    // Перехід зі сторінки «Послуги»: ?bookService=id — надійніше за router state (працює при повторній навігації на той самий URL)
+    // Перехід з «Послуги» (?bookService=) або «Лікарі» (?bookDoctor=)
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const doctorRaw = params.get('bookDoctor');
+      if (doctorRaw) {
+        const doctorId = +doctorRaw;
+        if (!Number.isFinite(doctorId)) {
+          this.clearBookingIntentQuery();
+          return;
+        }
+        this.openBookingFlowFromDoctorId(doctorId);
+        return;
+      }
+
       const raw = params.get('bookService');
       if (!raw) {
         return;
       }
       const serviceId = +raw;
       if (!Number.isFinite(serviceId)) {
-        this.clearBookServiceQuery();
+        this.clearBookingIntentQuery();
         return;
       }
       this.openBookingFlowFromServiceId(serviceId);
+    });
+  }
+
+  private openBookingFlowFromDoctorId(doctorId: number): void {
+    this.doctorService.getDoctorById(doctorId).subscribe({
+      next: (d) => {
+        if (d.directionId == null) {
+          console.error('API не повернув directionId для лікаря', doctorId);
+          this.clearBookingIntentQuery();
+          return;
+        }
+        this.openModalWithDoctorPrefill({
+          directionId: d.directionId,
+          doctorId: d.id
+        });
+        this.clearBookingIntentQuery();
+      },
+      error: (err) => {
+        console.error('Не вдалося завантажити лікаря для запису:', err);
+        this.clearBookingIntentQuery();
+      }
     });
   }
 
@@ -92,7 +130,7 @@ export class AppointmentsComponent implements OnInit {
       next: (s) => {
         if (s.directionId == null) {
           console.error('API не повернув directionId для послуги', serviceId);
-          this.clearBookServiceQuery();
+          this.clearBookingIntentQuery();
           return;
         }
         this.openModalWithPrefill({
@@ -100,18 +138,18 @@ export class AppointmentsComponent implements OnInit {
           typeId: s.typeId ?? null,
           serviceId: s.id
         });
-        this.clearBookServiceQuery();
+        this.clearBookingIntentQuery();
       },
       error: (err) => {
         console.error('Не вдалося завантажити послугу для запису:', err);
-        this.clearBookServiceQuery();
+        this.clearBookingIntentQuery();
       }
     });
   }
 
-  private clearBookServiceQuery(): void {
+  private clearBookingIntentQuery(): void {
     void this.router.navigate(['/user/appointments'], {
-      queryParams: { bookService: null },
+      queryParams: { bookService: null, bookDoctor: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -324,6 +362,43 @@ export class AppointmentsComponent implements OnInit {
         doctorCtrl?.setValue('', { emitEvent: false });
       },
       error: (err) => console.error('Помилка завантаження лікарів (prefill):', err)
+    });
+  }
+
+  /** Модалка з напрямком і лікарем (сторінка «Лікарі»); послугу користувач обирає сам — поле лишається порожнім, але доступним. */
+  public openModalWithDoctorPrefill(prefill: DoctorBookingPrefill): void {
+    this.openModal();
+
+    this.appointmentForm.patchValue(
+      {
+        directionId: String(prefill.directionId),
+        serviceTypeId: ''
+      },
+      { emitEvent: false }
+    );
+
+    const serviceCtrl = this.appointmentForm.get('serviceId');
+    const doctorCtrl = this.appointmentForm.get('doctorId');
+    this.resetFromDate();
+
+    const dirId = prefill.directionId;
+
+    this.clinicService.getServices(dirId, null).subscribe({
+      next: (services) => {
+        this.filteredServices.set(services);
+        serviceCtrl?.enable({ emitEvent: false });
+        serviceCtrl?.setValue('', { emitEvent: false });
+      },
+      error: (err) => console.error('Помилка завантаження послуг (prefill лікар):', err)
+    });
+
+    this.doctorService.getAllDoctors(dirId).subscribe({
+      next: (doctors) => {
+        this.filteredDoctors.set(doctors);
+        doctorCtrl?.enable({ emitEvent: false });
+        doctorCtrl?.setValue(String(prefill.doctorId), { emitEvent: true });
+      },
+      error: (err) => console.error('Помилка завантаження лікарів (prefill лікар):', err)
     });
   }
 
