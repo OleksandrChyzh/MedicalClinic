@@ -76,6 +76,83 @@
   p { margin: 2px 0 0; font-size: 0.95rem; color: #334155; font-weight: 500; }
 }
 
+// Панель фільтрів списку записів
+.appointments-filters {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px 24px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+    flex: 1 1 200px;
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  &__select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    max-width: 100%;
+
+    &:focus {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  &__reset {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+  }
+}
+
+.empty-state--filters {
+  padding: 40px 24px;
+}
+
 // Стилі для Списку пустих записів або Спінера завантаження
 .loading-state, .empty-state {
   text-align: center;

@@ -15,60 +15,104 @@
       <p>Завантаження записів...</p>
     </div>
   } @else {
-    <div class="appointments-grid">
-      @for (app of appointments(); track app.id) {
-        <div class="appointment-card">
-          <div class="card-header">
-            <span class="status-badge" [ngClass]="getStatusClass(app.status)">
-              {{ app.status }}
-            </span>
-            <span class="appointment-id">ID: #{{ app.id }}</span>
+    @if (appointments().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🗓️</div>
+        <h3>У вас ще немає записів</h3>
+        <p>Оберіть послугу та лікаря, щоб запланувати свій перший візит.</p>
+      </div>
+    } @else {
+      <div class="appointments-filters">
+        <div class="appointments-filters__row">
+          <div class="appointments-filters__field">
+            <label for="sortDate">Сортування за датою</label>
+            <select
+              id="sortDate"
+              class="appointments-filters__select"
+              [value]="dateSortOrder()"
+              (change)="onDateSortChange($event)">
+              <option value="asc">Спочатку раніші за датою</option>
+              <option value="desc">Спочатку пізніші за датою</option>
+            </select>
           </div>
-
-          <div class="card-body">
-            <h3 class="service-name">{{ app.serviceName }}</h3>
-
-            <div class="info-row">
-              <span class="icon">👤</span>
-              <div class="info-text">
-                <label>Пацієнт</label>
-                <p>{{ app.patientFullName }}</p>
-              </div>
-            </div>
-
-            <div class="info-row">
-              <span class="icon">👨‍⚕️</span>
-              <div class="info-text">
-                <label>Лікар</label>
-                <p>{{ app.doctorFullName }}</p>
-              </div>
-            </div>
-
-            <div class="info-row">
-              <span class="icon">📅</span>
-              <div class="info-text">
-                <label>Дата та час</label>
-                <p>{{ app.appointmentDate | date: 'dd.MM.yyyy, HH:mm' }}</p>
-              </div>
-            </div>
-
-            <div class="info-row">
-              <span class="icon">⏳</span>
-              <div class="info-text">
-                <label>Тривалість</label>
-                <p>{{ app.durationMinutes }} хв</p>
-              </div>
-            </div>
+          <div class="appointments-filters__field">
+            <label for="filterStatus">Фільтр за статусом</label>
+            <select
+              id="filterStatus"
+              class="appointments-filters__select"
+              [value]="statusFilter()"
+              (change)="onStatusFilterChange($event)">
+              <option value="">Усі статуси</option>
+              @for (st of uniqueStatuses(); track st) {
+                <option [value]="st">{{ st }}</option>
+              }
+            </select>
+          </div>
+          <div class="appointments-filters__actions">
+            <button type="button" class="appointments-filters__reset" (click)="resetListFilters()">
+              Скинути фільтри
+            </button>
           </div>
         </div>
-      } @empty {
-        <div class="empty-state">
-          <div class="empty-icon">🗓️</div>
-          <h3>У вас ще немає записів</h3>
-          <p>Оберіть послугу та лікаря, щоб запланувати свій перший візит.</p>
+      </div>
+
+      @if (filteredAppointments().length === 0) {
+        <div class="empty-state empty-state--filters">
+          <div class="empty-icon">🔍</div>
+          <h3>Записів не знайдено</h3>
+          <p>За обраними фільтрами немає записів. Спробуйте змінити статус або скинути фільтри.</p>
+        </div>
+      } @else {
+        <div class="appointments-grid">
+          @for (app of filteredAppointments(); track app.id) {
+            <div class="appointment-card">
+              <div class="card-header">
+                <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+                  {{ app.status }}
+                </span>
+                <span class="appointment-id">ID: #{{ app.id }}</span>
+              </div>
+
+              <div class="card-body">
+                <h3 class="service-name">{{ app.serviceName }}</h3>
+
+                <div class="info-row">
+                  <span class="icon">👤</span>
+                  <div class="info-text">
+                    <label>Пацієнт</label>
+                    <p>{{ app.patientFullName }}</p>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="icon">👨‍⚕️</span>
+                  <div class="info-text">
+                    <label>Лікар</label>
+                    <p>{{ app.doctorFullName }}</p>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="icon">📅</span>
+                  <div class="info-text">
+                    <label>Дата та час</label>
+                    <p>{{ app.appointmentDate | date: 'dd.MM.yyyy, HH:mm' }}</p>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="icon">⏳</span>
+                  <div class="info-text">
+                    <label>Тривалість</label>
+                    <p>{{ app.durationMinutes }} хв</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
         </div>
       }
-    </div>
+    }
   }
 </div>
 

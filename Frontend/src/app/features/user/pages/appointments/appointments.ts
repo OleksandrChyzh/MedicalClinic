@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -53,6 +53,44 @@ export class AppointmentsComponent implements OnInit {
   // Сигнали списку записів на прийом
   public appointments = signal<GetAppointmentDTO[]>([]);
   public isLoading = signal<boolean>(false);
+
+  /** Сортування за датою прийому: asc — від ранішої до пізнішої, desc — навпаки */
+  readonly dateSortOrder = signal<'asc' | 'desc'>('asc');
+  /** Порожній рядок — усі статуси (без урахування регістру) */
+  readonly statusFilter = signal<string>('');
+
+  readonly uniqueStatuses = computed(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const a of this.appointments()) {
+      const s = (a.status || '').trim();
+      if (!s) continue;
+      const key = s.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(s);
+    }
+    return out.sort((a, b) => a.localeCompare(b, 'uk'));
+  });
+
+  readonly filteredAppointments = computed(() => {
+    const all = this.appointments();
+    const statusKey = this.statusFilter().trim().toLowerCase();
+    const filtered = statusKey
+      ? all.filter(a => (a.status || '').trim().toLowerCase() === statusKey)
+      : [...all];
+
+    const dir = this.dateSortOrder();
+    filtered.sort((a, b) => {
+      const ta = new Date(a.appointmentDate).getTime();
+      const tb = new Date(b.appointmentDate).getTime();
+      if (ta !== tb) {
+        return dir === 'asc' ? ta - tb : tb - ta;
+      }
+      return b.id - a.id;
+    });
+    return filtered;
+  });
 
   // Сигнали для керування станом модального вікна
   public isModalOpen = signal<boolean>(false);
@@ -216,6 +254,20 @@ export class AppointmentsComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  onDateSortChange(ev: Event): void {
+    const v = (ev.target as HTMLSelectElement).value as 'asc' | 'desc';
+    this.dateSortOrder.set(v);
+  }
+
+  onStatusFilterChange(ev: Event): void {
+    this.statusFilter.set((ev.target as HTMLSelectElement).value);
+  }
+
+  resetListFilters(): void {
+    this.dateSortOrder.set('asc');
+    this.statusFilter.set('');
   }
 
   // Попереднє завантаження статичних списків та пацієнтів для модалки
