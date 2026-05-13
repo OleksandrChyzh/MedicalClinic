@@ -1,0 +1,65 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1>Мої записи на прийом</h1>
+    <p>Керуйте своїми візитами до лікарів MedicClinic</p>
+  </div>
+  <button class="btn-add-appointment">
+    <span>+</span> Новий запис
+  </button>
+</div>
+
+<div class="appointments-container">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Завантаження записів...</p>
+    </div>
+  } @else {
+    <div class="appointments-grid">
+      @for (app of appointments(); track app.id) {
+        <div class="appointment-card">
+          <div class="card-header">
+            <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+              {{ app.status }}
+            </span>
+            <span class="appointment-id">ID: #{{ app.id }}</span>
+          </div>
+
+          <div class="card-body">
+            <h3 class="service-name">{{ app.serviceName }}</h3>
+
+            <div class="info-row">
+              <span class="icon">👨‍⚕️</span>
+              <div class="info-text">
+                <label>Лікар</label>
+                <p>{{ app.doctorFullName }}</p>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <span class="icon">📅</span>
+              <div class="info-text">
+                <label>Дата та час</label>
+                <p>{{ app.appointmentDate | date: 'dd.MM.yyyy, HH:mm' }}</p>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <span class="icon">⏳</span>
+              <div class="info-text">
+                <label>Тривалість</label>
+                <p>{{ app.durationMinutes }} хв</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <div class="empty-icon">🗓️</div>
+          <h3>У вас ще немає записів</h3>
+          <p>Оберіть послугу та лікаря, щоб запланувати свій перший візит.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

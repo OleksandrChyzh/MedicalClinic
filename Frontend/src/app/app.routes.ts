@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
 import { ProfileComponent } from './features/user/pages/profile/profile';
 import { PatientsComponent } from './features/user/pages/patients/patients'; // <--- 1. ДОДАНО ІМПОРТ НОВОГО КОМПОНЕНТА
+import { AppointmentsComponent } from './features/user/pages/appointments/appointments';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -57,7 +58,12 @@ export const routes: Routes = [
         children: [
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
           { path: 'profile', component: ProfileComponent, title: 'Мій профіль' },
-          { path: 'patients', component: PatientsComponent, title: 'Мої пацієнти' } // <--- 2. ДОДАНО РОУТ ДЛЯ ПАЦІЄНТІВ
+          { path: 'patients', component: PatientsComponent, title: 'Мої пацієнти' }, // <--- 2. ДОДАНО РОУТ ДЛЯ ПАЦІЄНТІВ
+          {
+            path: 'appointments',
+            component: AppointmentsComponent,
+            title: 'Мої записи на прийом'
+          }
         ]
       }
     ]
