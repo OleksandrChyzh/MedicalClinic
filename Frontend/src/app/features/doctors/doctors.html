@@ -74,6 +74,13 @@
               @if (expandedDoctors().has(doc.id)) {
                 <div class="reviews-section reviews-section--overlay">
 
+                  <div class="reviews-overlay-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: #ffffff; z-index: 11;">
+                    <span class="overlay-title" style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">Відгуки пацієнтів</span>
+                    <button class="close-overlay-btn" (click)="toggleReviews(doc.id)" title="Закрити" style="background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 0.8rem; transition: all 0.2s;">
+                      ✕
+                    </button>
+                  </div>
+
                   @if (isLoadingReviews().has(doc.id)) {
                     <div class="reviews-loading">
                       <span class="spinner-small"></span> Завантаження...
@@ -84,7 +91,7 @@
                       @if (reviews.length === 0) {
                         <p class="no-reviews">Для цього лікаря ще немає відгуків.</p>
                       } @else {
-                        <div class="reviews-list">
+                        <div class="reviews-list" style="flex-grow: 1; overflow-y: auto;">
                           @for (review of reviews; track review.id) {
                             <div class="review-item">
                               <div class="review-header">
