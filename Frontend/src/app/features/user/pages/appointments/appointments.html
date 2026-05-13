@@ -3,7 +3,7 @@
     <h1>Мої записи на прийом</h1>
     <p>Керуйте своїми візитами до лікарів MedicClinic</p>
   </div>
-  <button class="btn-add-appointment">
+  <button class="btn-add-appointment" (click)="openModal()">
     <span>+</span> Новий запис
   </button>
 </div>
@@ -27,6 +27,14 @@
 
           <div class="card-body">
             <h3 class="service-name">{{ app.serviceName }}</h3>
+
+            <div class="info-row">
+              <span class="icon">👤</span>
+              <div class="info-text">
+                <label>Пацієнт</label>
+                <p>{{ app.patientFullName }}</p>
+              </div>
+            </div>
 
             <div class="info-row">
               <span class="icon">👨‍⚕️</span>
@@ -63,3 +71,111 @@
     </div>
   }
 </div>
+
+@if (isModalOpen()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-window" (click)="$event.stopPropagation()" [formGroup]="appointmentForm">
+
+      <div class="modal-header">
+        <h2>Запис на прийом</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label for="patientSelect">1. Оберіть пацієнта:</label>
+          <select id="patientSelect" formControlName="patientId" class="form-control">
+            <option value="">-- Оберіть, кого записати --</option>
+            @for (pat of patients(); track pat.id) {
+              <option [value]="pat.id">{{ pat.fullName }} ({{ pat.age }} р.)</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="directionSelect">2. Напрямок медичної допомоги:</label>
+          <select id="directionSelect" formControlName="directionId" class="form-control">
+            <option value="">-- Оберіть напрямок --</option>
+            @for (dir of directions(); track dir.id) {
+              <option [value]="dir.id">{{ dir.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="typeSelect">Тип послуги (опціонально):</label>
+          <select id="typeSelect" formControlName="serviceTypeId" class="form-control">
+            <option value="">Усі типи</option>
+            @for (type of serviceTypes(); track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="serviceSelect">3. Послуга клініки:</label>
+          <select id="serviceSelect" formControlName="serviceId" class="form-control">
+            <option value="">-- Спочатку оберіть напрямок --</option>
+            @for (srv of filteredServices(); track srv.id) {
+              <option [value]="srv.id">{{ srv.name }} — {{ srv.price }} грн</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="doctorSelect">4. Оберіть спеціаліста:</label>
+          <select id="doctorSelect" formControlName="doctorId" class="form-control">
+            <option value="">-- Спочатку оберіть напрямок --</option>
+            @for (doc of filteredDoctors(); track doc.id) {
+              <option [value]="doc.id">{{ doc.fullName }} (досвід: {{ doc.experienceYears }} р.)</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="dateInput">5. Оберіть дату візиту:</label>
+          <input type="date" id="dateInput" formControlName="date" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>6. Доступний час прийому:</label>
+
+          @if (isLoadingSlots()) {
+            <div class="slots-loader">
+              <div class="mini-spinner"></div> Оновлюємо графік лікаря...
+            </div>
+          } @else {
+            <div class="slots-grid">
+              @for (slot of availableSlots(); track slot.startTime) {
+                <label class="slot-radio">
+                  <input type="radio" formControlName="timeSlot" [value]="slot" />
+                  <span class="slot-tile">
+                    {{ slot.startTime | slice:0:5 }}
+                  </span>
+                </label>
+              } @empty {
+                <p class="no-slots-text">
+                  {{ appointmentForm.get('date')?.value ? 'На вказану дату вільних вікон немає.' : 'Будь ласка, вкажіть лікаря та дату.' }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()" [disabled]="isSubmitting()">
+          Скасувати
+        </button>
+        <button type="button" class="btn-primary"
+                (click)="onCreateAppointment()"
+                [disabled]="appointmentForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Обробка...' : 'Підтвердити запис' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
