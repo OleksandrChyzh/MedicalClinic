@@ -30,4 +30,8 @@ export class ClinicService {
 
     return this.http.get<MedicalService[]>(`${this.baseUrl}/Service`, { params });
   }
+
+  getServiceById(id: number): Observable<MedicalService> {
+    return this.http.get<MedicalService>(`${this.baseUrl}/Service/${id}`);
+  }
 }

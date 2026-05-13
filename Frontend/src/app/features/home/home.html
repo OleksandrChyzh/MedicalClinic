@@ -7,7 +7,11 @@
     </p>
 
     <div class="hero__actions">
-      <a routerLink="/login" class="btn btn-primary">Записатися на прийом</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/user/appointments" class="btn btn-primary">Записатися на прийом</a>
+      } @else {
+        <a routerLink="/login" class="btn btn-primary">Записатися на прийом</a>
+      }
       <a routerLink="/services" class="btn btn-outline">Наші послуги</a>
     </div>
   </div>

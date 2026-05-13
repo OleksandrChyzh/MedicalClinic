@@ -1,22 +1,25 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common'; // Обов'язково для DatePipe
+import { Router } from '@angular/router';
 import { ClinicService } from '../../core/services/clinic.service';
 import { ReviewService } from '../../core/services/review.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Direction, MedicalService, ServiceType } from '../../models/service.models';
 import { Review } from '../../models/review.models';
-import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-services',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './services.html',
   styleUrl: './services.scss'
 })
 export class ServicesComponent implements OnInit {
   private clinicService = inject(ClinicService);
   private reviewService = inject(ReviewService);
+  private router = inject(Router);
+  readonly auth = inject(AuthService);
 
   // Стан для відгуків
   expandedServices = signal<Set<number>>(new Set());
@@ -114,5 +117,16 @@ export class ServicesComponent implements OnInit {
   // Допоміжна функція для малювання зірочок
   getStars(rating: number): string {
     return '⭐'.repeat(rating);
+  }
+
+  /** Запис: без логіну → /login; з логіном → сторінка записів відкриє модалку з цією послугою (query `bookService`). */
+  bookAppointment(service: MedicalService): void {
+    if (!this.auth.isLoggedIn()) {
+      void this.router.navigate(['/login']);
+      return;
+    }
+    void this.router.navigate(['/user/appointments'], {
+      queryParams: { bookService: service.id }
+    });
   }
 }

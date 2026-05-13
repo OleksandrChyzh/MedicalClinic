@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {LoginComponent} from '../auth/login/login';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink], // ДОДАНО: імпорт для роботи маршрутизації в HTML
+  imports: [RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class HomeComponent {}
+export class HomeComponent {
+  /** Для шаблону: умовне посилання «Записатися» залежно від авторизації */
+  readonly auth = inject(AuthService);
+}

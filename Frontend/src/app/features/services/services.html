@@ -74,7 +74,9 @@
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(service.id)">
                     {{ expandedServices().has(service.id) ? 'Сховати' : 'Відгуки' }}
                   </button>
-                  <button routerLink="/login" class="btn btn-primary btn-sm">Записатися</button>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="bookAppointment(service)">
+                    Записатися
+                  </button>
                 </div>
               </div>
 

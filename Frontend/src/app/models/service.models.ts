@@ -17,4 +17,8 @@ export interface MedicalService {
   price: number;
   averageRating: number;
   reviewsCount: number;
+  /** З бекенду GetServiceDTO — для переходу на форму запису з попереднім вибором */
+  directionId?: number;
+  /** З бекенду GetServiceDTO (JSON: typeId) */
+  typeId?: number;
 }

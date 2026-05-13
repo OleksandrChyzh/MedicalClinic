@@ -1,6 +1,8 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { DoctorService } from '../../../../core/services/doctor.service';
 import { ClinicService } from '../../../../core/services/clinic.service';
@@ -15,6 +17,13 @@ import { Doctor } from '../../../../models/doctor.model';
 import { Direction, MedicalService, ServiceType } from '../../../../models/service.models';
 import { Patient } from '../../../../models/patient.model';
 import { UserProfile } from '../../../../models/user.model';
+
+/** Дані з router state після «Записатися» на сторінці послуг */
+interface BookingPrefill {
+  directionId: number;
+  typeId: number | null;
+  serviceId: number;
+}
 
 @Component({
   selector: 'app-appointments',
@@ -31,6 +40,9 @@ export class AppointmentsComponent implements OnInit {
   private userService = inject(UserService);
   private patientService = inject(PatientService);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   // Сигнали списку записів на прийом
   public appointments = signal<GetAppointmentDTO[]>([]);
@@ -58,6 +70,51 @@ export class AppointmentsComponent implements OnInit {
     this.initForm();
     this.loadModalStaticData();
     this.loadUserProfile();
+
+    // Перехід зі сторінки «Послуги»: ?bookService=id — надійніше за router state (працює при повторній навігації на той самий URL)
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const raw = params.get('bookService');
+      if (!raw) {
+        return;
+      }
+      const serviceId = +raw;
+      if (!Number.isFinite(serviceId)) {
+        this.clearBookServiceQuery();
+        return;
+      }
+      this.openBookingFlowFromServiceId(serviceId);
+    });
+  }
+
+  /** Завантажує послугу з API, відкриває модалку з напрямком/типом/послугою, прибирає query з адресного рядка. */
+  private openBookingFlowFromServiceId(serviceId: number): void {
+    this.clinicService.getServiceById(serviceId).subscribe({
+      next: (s) => {
+        if (s.directionId == null) {
+          console.error('API не повернув directionId для послуги', serviceId);
+          this.clearBookServiceQuery();
+          return;
+        }
+        this.openModalWithPrefill({
+          directionId: s.directionId,
+          typeId: s.typeId ?? null,
+          serviceId: s.id
+        });
+        this.clearBookServiceQuery();
+      },
+      error: (err) => {
+        console.error('Не вдалося завантажити послугу для запису:', err);
+        this.clearBookServiceQuery();
+      }
+    });
+  }
+
+  private clearBookServiceQuery(): void {
+    void this.router.navigate(['/user/appointments'], {
+      queryParams: { bookService: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   // Ініціалізація форми з урахуванням реактивних правил
@@ -228,6 +285,46 @@ export class AppointmentsComponent implements OnInit {
       timeSlot: ''
     });
     this.isModalOpen.set(true);
+  }
+
+  /** Відкрити модалку запису з уже обраними напрямком, типом (за потреби) та послугою (наприклад, зі сторінки «Послуги»). */
+  public openModalWithPrefill(prefill: BookingPrefill): void {
+    this.openModal();
+
+    const typeStr = prefill.typeId != null ? String(prefill.typeId) : '';
+
+    this.appointmentForm.patchValue(
+      {
+        directionId: String(prefill.directionId),
+        serviceTypeId: typeStr
+      },
+      { emitEvent: false }
+    );
+
+    const serviceCtrl = this.appointmentForm.get('serviceId');
+    const doctorCtrl = this.appointmentForm.get('doctorId');
+    this.resetFromDate();
+
+    const dirId = prefill.directionId;
+    const typeId = prefill.typeId;
+
+    this.clinicService.getServices(dirId, typeId).subscribe({
+      next: (services) => {
+        this.filteredServices.set(services);
+        serviceCtrl?.enable({ emitEvent: false });
+        serviceCtrl?.setValue(String(prefill.serviceId), { emitEvent: false });
+      },
+      error: (err) => console.error('Помилка завантаження послуг (prefill):', err)
+    });
+
+    this.doctorService.getAllDoctors(dirId).subscribe({
+      next: (doctors) => {
+        this.filteredDoctors.set(doctors);
+        doctorCtrl?.enable({ emitEvent: false });
+        doctorCtrl?.setValue('', { emitEvent: false });
+      },
+      error: (err) => console.error('Помилка завантаження лікарів (prefill):', err)
+    });
   }
 
   public closeModal(): void {
