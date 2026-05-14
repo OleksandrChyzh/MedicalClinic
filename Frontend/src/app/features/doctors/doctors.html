@@ -91,42 +91,53 @@
 
                     @if (auth.isLoggedIn()) {
                       <div class="review-compose">
-                        <h4 class="review-compose__title">Залишити відгук</h4>
-                        <div class="review-compose__rating">
-                          <span class="review-compose__label">Оцінка</span>
-                          <div class="review-compose__stars">
-                            @for (n of ratingStars; track n) {
-                              <button
-                                type="button"
-                                class="review-compose__star"
-                                [class.review-compose__star--active]="composeRating() >= n"
-                                (click)="composeRating.set(n)"
-                                [attr.aria-label]="'Оцінка ' + n + ' з 5'"
-                                [attr.aria-pressed]="composeRating() === n">
-                                ★
-                              </button>
-                            }
-                          </div>
-                        </div>
-                        <label class="review-compose__label" for="doc-review-{{ doc.id }}">Коментар (необов’язково)</label>
-                        <textarea
-                          id="doc-review-{{ doc.id }}"
-                          class="review-compose__textarea"
-                          rows="3"
-                          maxlength="1000"
-                          placeholder="Поділіться враженням про прийом…"
-                          [ngModel]="composeComment()"
-                          (ngModelChange)="composeComment.set($event)"></textarea>
-                        @if (reviewSubmitError(); as err) {
-                          <p class="review-compose__error">{{ err }}</p>
-                        }
                         <button
                           type="button"
-                          class="btn btn-primary btn-sm review-compose__submit"
-                          (click)="submitDoctorReview(doc.id)"
-                          [disabled]="isSubmittingReview()">
-                          {{ isSubmittingReview() ? 'Надсилання…' : 'Надіслати відгук' }}
+                          class="review-compose__toggle"
+                          (click)="toggleReviewForm(doc.id)"
+                          [attr.aria-expanded]="expandedReviewForms().has(doc.id)">
+                          <span>Залишити відгук</span>
+                          <span class="review-compose__toggle-icon">{{ expandedReviewForms().has(doc.id) ? '−' : '+' }}</span>
                         </button>
+                        @if (expandedReviewForms().has(doc.id)) {
+                          <div class="review-compose__body">
+                            <div class="review-compose__rating">
+                              <span class="review-compose__label">Оцінка</span>
+                              <div class="review-compose__stars">
+                                @for (n of ratingStars; track n) {
+                                  <button
+                                    type="button"
+                                    class="review-compose__star"
+                                    [class.review-compose__star--active]="composeRating() >= n"
+                                    (click)="composeRating.set(n)"
+                                    [attr.aria-label]="'Оцінка ' + n + ' з 5'"
+                                    [attr.aria-pressed]="composeRating() === n">
+                                    ★
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                            <label class="review-compose__label" for="doc-review-{{ doc.id }}">Коментар (необов’язково)</label>
+                            <textarea
+                              id="doc-review-{{ doc.id }}"
+                              class="review-compose__textarea"
+                              rows="3"
+                              maxlength="1000"
+                              placeholder="Поділіться враженням про прийом…"
+                              [ngModel]="composeComment()"
+                              (ngModelChange)="composeComment.set($event)"></textarea>
+                            @if (reviewSubmitError(); as err) {
+                              <p class="review-compose__error">{{ err }}</p>
+                            }
+                            <button
+                              type="button"
+                              class="btn btn-primary btn-sm review-compose__submit"
+                              (click)="submitDoctorReview(doc.id)"
+                              [disabled]="isSubmittingReview()">
+                              {{ isSubmittingReview() ? 'Надсилання…' : 'Надіслати відгук' }}
+                            </button>
+                          </div>
+                        }
                       </div>
                     } @else {
                       <p class="reviews-login-hint">Увійдіть у систему, щоб залишити відгук про лікаря.</p>

@@ -46,6 +46,7 @@ export class DoctorsComponent implements OnInit {
   expandedDoctors = signal<Set<number>>(new Set());
   doctorReviews = signal<Map<number, Review[]>>(new Map());
   isLoadingReviews = signal<Set<number>>(new Set());
+  expandedReviewForms = signal<Set<number>>(new Set());
 
   // Обчислюваний список напрямків для фільтра (беремо унікальні з отриманих лікарів)
   directions = computed(() => {
@@ -90,6 +91,7 @@ export class DoctorsComponent implements OnInit {
     if (currentExpanded.has(doctorId)) {
       currentExpanded.delete(doctorId);
       this.expandedDoctors.set(currentExpanded);
+      this.closeReviewForm(doctorId);
       return;
     }
 
@@ -98,6 +100,7 @@ export class DoctorsComponent implements OnInit {
     this.composeRating.set(5);
     this.composeComment.set('');
     this.reviewSubmitError.set(null);
+    this.expandedReviewForms.set(new Set());
 
     const currentReviewsMap = this.doctorReviews();
     if (!currentReviewsMap.has(doctorId)) {
@@ -126,6 +129,28 @@ export class DoctorsComponent implements OnInit {
       loadingSet.delete(doctorId);
     }
     this.isLoadingReviews.set(loadingSet);
+  }
+
+  toggleReviewForm(doctorId: number): void {
+    const forms = new Set(this.expandedReviewForms());
+
+    if (forms.has(doctorId)) {
+      forms.delete(doctorId);
+    } else {
+      forms.clear();
+      forms.add(doctorId);
+      this.composeRating.set(5);
+      this.composeComment.set('');
+      this.reviewSubmitError.set(null);
+    }
+
+    this.expandedReviewForms.set(forms);
+  }
+
+  private closeReviewForm(doctorId: number): void {
+    const forms = new Set(this.expandedReviewForms());
+    forms.delete(doctorId);
+    this.expandedReviewForms.set(forms);
   }
 
   // Допоміжний метод для зірочок
@@ -161,6 +186,7 @@ export class DoctorsComponent implements OnInit {
         next: () => {
           this.composeRating.set(5);
           this.composeComment.set('');
+          this.closeReviewForm(doctorId);
           this.reloadDoctorReviews(doctorId);
         },
         error: (err: unknown) => {
