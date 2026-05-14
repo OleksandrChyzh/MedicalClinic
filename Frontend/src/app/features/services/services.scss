@@ -219,16 +219,42 @@
 
   .review-compose {
     margin-bottom: 1rem;
-    padding: 1rem;
+    padding: 0;
     border-radius: var(--radius-md);
     border: 1px solid #e0f2fe;
     background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+    overflow: hidden;
 
-    &__title {
-      margin: 0 0 0.65rem;
+    &__toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0.95rem;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
       font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-main);
+    }
+
+    &__toggle-icon {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0284c7;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    &__body {
+      padding: 0 1rem 1rem;
     }
 
     &__label {
