@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Models.Doctor;
+using BLL.Models.User;
 using DAL.Entities;
 
 namespace BLL.MappingProfiles;
@@ -25,12 +26,6 @@ public class DoctorProfile : Profile
             .ForMember(dest => dest.DirectionName,
                 opt => opt.MapFrom(src => src.Direction != null ? src.Direction.Name : string.Empty))
 
-            // Контакти беремо з прив'язаного акаунту IdentityUser
-            .ForMember(dest => dest.ContactPhone,
-                opt => opt.MapFrom(src => src.User != null ? src.User.PhoneNumber : string.Empty))
-            .ForMember(dest => dest.ContactEmail,
-                opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty))
-
             // Кількість відгуків
             .ForMember(dest => dest.ReviewsCount,
                 opt => opt.MapFrom(src => src.Reviews != null ? src.Reviews.Count : 0))
@@ -47,5 +42,18 @@ public class DoctorProfile : Profile
                 opt => opt.MapFrom(src => src.Reviews != null
                     ? src.Reviews.Select(r => r.Id).ToList()
                     : new List<int>()));
+
+        // 4. Профіль «лікар + користувач» для автентифікованого лікаря
+        // 4. Профіль «лікар + користувач»
+        this.CreateMap<Doctor, DoctorProfileDto>()
+            // Кажемо: для властивості Doctor візьми весь об'єкт Doctor (src) 
+            // і замапь його за правилами GetDoctorDto (які описані вище)
+            .ForMember(dest => dest.Doctor, opt => opt.MapFrom(src => src))
+
+            // Кажемо: для властивості User візьми об'єкт User із сутності Doctor
+            // і замапь його за правилами GetUser
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
     }
 }
+
+// AutoMapper створює конвертер через reflection; тип має бути public, інакше не вдасться створити екз

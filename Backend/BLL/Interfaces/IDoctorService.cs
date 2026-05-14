@@ -5,6 +5,7 @@ public interface IDoctorService
 {
     Task<IEnumerable<GetDoctorDto>> GetAllDoctorsAsync(int? directionId);
     Task<GetDoctorDto> GetDoctorByIdAsync(int id);
+    Task<DoctorProfileDto> GetMyDoctorProfileAsync(int userId);
     Task<GetDoctorDto> CreateDoctorAsync(AddDoctorDTO dto);
     Task UpdateDoctorAsync(int id, UpdateDoctorDTO dto);
     Task DeleteDoctorAsync(int id);

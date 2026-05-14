@@ -41,6 +41,21 @@ public class DoctorService(
         return mapper.Map<GetDoctorDto>(doctor);
     }
 
+    public async Task<DoctorProfileDto> GetMyDoctorProfileAsync(int userId)
+    {
+        var doctor = await unitOfWork.DoctorRepository.GetFirstOrDefaultAsync(
+            filter: d => d.UserId == userId,
+            includes: [d => d.Direction, d => d.User, d => d.Reviews]
+        );
+
+        if (doctor == null)
+        {
+            throw new KeyNotFoundException("Профіль лікаря не знайдено.");
+        }
+
+        return mapper.Map<DoctorProfileDto>(doctor);
+    }
+
     public async Task<GetDoctorDto> CreateDoctorAsync(AddDoctorDTO dto)
     {
         // 1. Створюємо Identity User, використовуючи дані з dto.Account

@@ -23,8 +23,5 @@ public class GetDoctorDto
     public List<int> ReviewIds { get; set; } = new();
 
     // Email або Phone з сутності User
-    public string ContactPhone { get; set; } = string.Empty;
-
-    public string ContactEmail { get; set; } = string.Empty;
 
 }

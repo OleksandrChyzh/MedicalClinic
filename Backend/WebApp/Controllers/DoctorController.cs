@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BLL.Interfaces;
 using BLL.Models.Doctor;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,8 @@ namespace WebApp.Controllers;
 [ApiController]
 public class DoctorController(IDoctorService doctorService) : ControllerBase
 {
+    private int CurrentUserId => int.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     // Доступно всім (гостям і авторизованим)
     [AllowAnonymous]
     [HttpGet]
@@ -17,6 +20,15 @@ public class DoctorController(IDoctorService doctorService) : ControllerBase
         // Передаємо параметр фільтрації в сервіс
         var doctors = await doctorService.GetAllDoctorsAsync(directionId);
         return this.Ok(doctors);
+    }
+
+    /// <summary>Поточний лікар переглядає свій профіль (лікарські + користувацькі дані). UserId з JWT.</summary>
+    [Authorize(Roles = "Doctor")]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetMyProfile()
+    {
+        var profile = await doctorService.GetMyDoctorProfileAsync(this.CurrentUserId);
+        return this.Ok(profile);
     }
 
     // Доступно всім
