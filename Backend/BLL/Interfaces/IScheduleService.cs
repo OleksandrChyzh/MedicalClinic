@@ -5,6 +5,7 @@ public interface IScheduleService
 {
     // Читання (доступно всім)
     Task<IEnumerable<GetScheduleDTO>> GetDoctorScheduleAsync(int doctorId);
+    Task<IEnumerable<GetScheduleDTO>> GetMyScheduleAsync(int userId);
     Task<GetScheduleDTO> GetScheduleByIdAsync(int id);
 
     // Модифікація (тільки для Admin)

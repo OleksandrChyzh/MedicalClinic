@@ -15,6 +15,20 @@ public class ScheduleService(IUnitOfWork unitOfWork, IMapper mapper) : ISchedule
         return mapper.Map<IEnumerable<GetScheduleDTO>>(schedules);
     }
 
+    public async Task<IEnumerable<GetScheduleDTO>> GetMyScheduleAsync(int userId)
+    {
+        var doctor = await unitOfWork.DoctorRepository.GetFirstOrDefaultAsync(
+            filter: d => d.UserId == userId
+        );
+
+        if (doctor == null)
+        {
+            throw new KeyNotFoundException("Профіль лікаря не знайдено.");
+        }
+
+        return await this.GetDoctorScheduleAsync(doctor.Id);
+    }
+
     public async Task<GetScheduleDTO> GetScheduleByIdAsync(int id)
     {
         var schedule = await unitOfWork.ScheduleRepository.GetByIdAsync(id);

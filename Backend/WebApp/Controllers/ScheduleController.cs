@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using BLL.Models.Schedule;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebApp.Controllers;
 
@@ -10,6 +11,16 @@ namespace WebApp.Controllers;
 [Authorize] // Загальний доступ тільки для авторизованих користувачів
 public class ScheduleController(IScheduleService scheduleService) : ControllerBase
 {
+    private int CurrentUserId => int.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+    [Authorize(Roles = "Doctor")]
+    [HttpGet("my")]
+    public async Task<IActionResult> GetMySchedule()
+    {
+        var schedules = await scheduleService.GetMyScheduleAsync(this.CurrentUserId);
+        return this.Ok(schedules);
+    }
+
     // GET: api/schedule/doctor/5
     // Доступно всім авторизованим (Пацієнтам, Лікарям, Адмінам)
     [HttpGet("doctor/{doctorId}")]

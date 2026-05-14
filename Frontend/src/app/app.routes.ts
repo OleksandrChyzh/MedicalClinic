@@ -5,6 +5,7 @@ import { PatientsComponent } from './features/user/pages/patients/patients'; // 
 import { AppointmentsComponent } from './features/user/pages/appointments/appointments';
 import { DoctorProfileComponent } from './features/doctor/pages/profile/doctor-profile';
 import { DoctorPlaceholderComponent } from './features/doctor/pages/placeholder/doctor-placeholder';
+import { DoctorScheduleComponent } from './features/doctor/pages/schedule/doctor-schedule';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -78,7 +79,7 @@ export const routes: Routes = [
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
           { path: 'profile', component: DoctorProfileComponent, title: 'Мій профіль лікаря' },
           { path: 'appointments', component: DoctorPlaceholderComponent, title: 'Мої записи' },
-          { path: 'schedule', component: DoctorPlaceholderComponent, title: 'Мій розклад' }
+          { path: 'schedule', component: DoctorScheduleComponent, title: 'Мій розклад' }
         ]
       }
     ]

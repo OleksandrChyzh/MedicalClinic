@@ -1,0 +1,44 @@
+<div class="schedule-page">
+  <div class="page-header">
+    <div>
+      <h2>Мій розклад</h2>
+      <p>Переглядайте актуальні робочі години за днями тижня.</p>
+    </div>
+
+    <button class="refresh-btn" type="button" (click)="loadSchedule()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Оновлення...' : 'Оновити' }}
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-card">
+      <p>Завантаження розкладу...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state-card error-state">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (orderedSchedules().length === 0) {
+    <div class="state-card empty-state">
+      <div class="empty-icon">🕒</div>
+      <h3>Розклад ще не заповнений</h3>
+      <p>Поки що для вашого профілю лікаря немає доданих робочих днів.</p>
+    </div>
+  } @else {
+    <div class="schedule-grid">
+      @for (schedule of orderedSchedules(); track schedule.id) {
+        <article class="schedule-card">
+          <div class="day-badge">{{ schedule.weekDay }}</div>
+
+          <div class="time-range">
+            <span>{{ schedule.startTime }}</span>
+            <span class="time-separator">—</span>
+            <span>{{ schedule.endTime }}</span>
+          </div>
+
+          <div class="duration">Тривалість: {{ getDuration(schedule) }}</div>
+        </article>
+      }
+    </div>
+  }
+</div>
