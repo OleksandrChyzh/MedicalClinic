@@ -39,7 +39,9 @@ export class LoginComponent {
         const roles = response.roles || [];
 
         // Логіка перенаправлення залежно від ролі
-        if (roles.includes('User')) {
+        if (roles.includes('Doctor')) {
+          this.router.navigate(['/doctor/profile']);
+        } else if (roles.includes('User')) {
           this.router.navigate(['/user/profile']);
         } else if (roles.includes('Admin')) {
           this.router.navigate(['/admin/dashboard']);

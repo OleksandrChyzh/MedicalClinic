@@ -8,8 +8,18 @@ export interface Doctor {
   averageRating: number;
   reviewsCount: number;
   reviewIds: number[];
-  contactPhone: string;
-  contactEmail: string;
+  contactPhone?: string;
+  contactEmail?: string;
+}
+
+export interface DoctorProfile {
+  doctor: Doctor;
+  user: {
+    id: number;
+    email: string;
+    userName: string;
+    phoneNumber: string | null;
+  };
 }
 
 // Також нам знадобиться модель для напрямків (для фільтрації)

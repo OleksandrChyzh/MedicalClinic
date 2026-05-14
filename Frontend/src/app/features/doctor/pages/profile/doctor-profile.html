@@ -1,0 +1,84 @@
+<h2>Мій профіль лікаря</h2>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <p>Завантаження даних профілю...</p>
+  </div>
+} @else {
+  @if (profile(); as profileData) {
+    <div class="profile-card">
+      @if (errorMessage()) {
+        <div class="inline-error">{{ errorMessage() }}</div>
+      }
+
+      @if (!isEditing()) {
+        <div class="card-header">
+          <div class="avatar-circle">
+            {{ getInitials(profileData.doctor.fullName || profileData.user.userName) }}
+          </div>
+
+          <div class="user-details">
+            <h3>{{ profileData.doctor.fullName || profileData.user.userName }}</h3>
+            <p class="role">Лікар</p>
+            <p class="contact-info">{{ profileData.user.email }}</p>
+
+            @if (profileData.user.phoneNumber) {
+              <p class="contact-info text-muted">{{ profileData.user.phoneNumber }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="doctor-details">
+          <div class="detail-item">
+            <span class="detail-label">Напрямок</span>
+            <span class="detail-value">{{ profileData.doctor.directionName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Досвід</span>
+            <span class="detail-value">{{ profileData.doctor.experienceYears }} років</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Рейтинг</span>
+            <span class="detail-value">{{ profileData.doctor.averageRating }} / 5</span>
+          </div>
+          <div class="detail-item detail-item--wide">
+            <span class="detail-label">Опис</span>
+            <span class="detail-value">{{ profileData.doctor.description || 'Опис відсутній' }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline" (click)="startEditing()">Редагувати користувацькі дані</button>
+        </div>
+      } @else {
+        <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="edit-form">
+          <div class="form-group">
+            <label>Ім'я користувача</label>
+            <input type="text" formControlName="userName" class="form-control" placeholder="Введіть ім'я">
+          </div>
+
+          <div class="form-group">
+            <label>Номер телефону</label>
+            <input type="text" formControlName="phoneNumber" class="form-control" placeholder="+380...">
+          </div>
+
+          <div class="form-group">
+            <label>Новий пароль (необов'язково)</label>
+            <input type="password" formControlName="password" class="form-control" placeholder="Залиште пустим, якщо не змінюєте">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline cancel" (click)="cancelEditing()" [disabled]="isSaving()">Скасувати</button>
+            <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || isSaving()">
+              {{ isSaving() ? 'Збереження...' : 'Зберегти зміни' }}
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  } @else {
+    <div class="error-state">
+      <p>{{ errorMessage() || 'Не вдалося завантажити дані. Спробуйте оновити сторінку.' }}</p>
+    </div>
+  }
+}

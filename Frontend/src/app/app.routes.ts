@@ -3,7 +3,10 @@ import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
 import { ProfileComponent } from './features/user/pages/profile/profile';
 import { PatientsComponent } from './features/user/pages/patients/patients'; // <--- 1. ДОДАНО ІМПОРТ НОВОГО КОМПОНЕНТА
 import { AppointmentsComponent } from './features/user/pages/appointments/appointments';
+import { DoctorProfileComponent } from './features/doctor/pages/profile/doctor-profile';
+import { DoctorPlaceholderComponent } from './features/doctor/pages/placeholder/doctor-placeholder';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -54,7 +57,8 @@ export const routes: Routes = [
       // ==========================================
       {
         path: 'user',
-        canActivate: [authGuard], // Захищаємо цю групу
+        canActivate: [authGuard, roleGuard], // Захищаємо цю групу
+        data: { roles: ['User'] },
         children: [
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
           { path: 'profile', component: ProfileComponent, title: 'Мій профіль' },
@@ -64,6 +68,17 @@ export const routes: Routes = [
             component: AppointmentsComponent,
             title: 'Мої записи на прийом'
           }
+        ]
+      },
+      {
+        path: 'doctor',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Doctor'] },
+        children: [
+          { path: '', redirectTo: 'profile', pathMatch: 'full' },
+          { path: 'profile', component: DoctorProfileComponent, title: 'Мій профіль лікаря' },
+          { path: 'appointments', component: DoctorPlaceholderComponent, title: 'Мої записи' },
+          { path: 'schedule', component: DoctorPlaceholderComponent, title: 'Мій розклад' }
         ]
       }
     ]

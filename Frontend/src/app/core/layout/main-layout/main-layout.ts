@@ -15,4 +15,8 @@ export class MainLayoutComponent {
 
   // Отримуємо стан авторизації (це сигнал)
   isLoggedIn = this.authService.isLoggedIn;
+
+  hasRole(role: string): boolean {
+    return this.authService.getUserRoles().includes(role);
+  }
 }

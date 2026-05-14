@@ -4,18 +4,30 @@
   @if (isLoggedIn()) {
     <aside class="dashboard-sidebar">
       <div class="sidebar-menu">
-        <a routerLink="/user/profile" routerLinkActive="active" class="menu-item">
-          <span class="icon">👤</span> Профіль
-        </a>
-        <a routerLink="/user/appointments" routerLinkActive="active" class="menu-item">
-          <span class="icon">📅</span> Мої записи
-        </a>
-        <a routerLink="/user/patients" routerLinkActive="active" class="menu-item">
-          <span class="icon">🗂️</span> Мої пацієнти
-        </a>
-        <a routerLink="/user/settings" routerLinkActive="active" class="menu-item">
-          <span class="icon">⚙️</span> Налаштування
-        </a>
+        @if (hasRole('Doctor')) {
+          <a routerLink="/doctor/appointments" routerLinkActive="active" class="menu-item">
+            <span class="icon">📅</span> Мої записи
+          </a>
+          <a routerLink="/doctor/schedule" routerLinkActive="active" class="menu-item">
+            <span class="icon">🕒</span> Мій розклад
+          </a>
+          <a routerLink="/doctor/profile" routerLinkActive="active" class="menu-item">
+            <span class="icon">👤</span> Мій профіль
+          </a>
+        } @else {
+          <a routerLink="/user/profile" routerLinkActive="active" class="menu-item">
+            <span class="icon">👤</span> Профіль
+          </a>
+          <a routerLink="/user/appointments" routerLinkActive="active" class="menu-item">
+            <span class="icon">📅</span> Мої записи
+          </a>
+          <a routerLink="/user/patients" routerLinkActive="active" class="menu-item">
+            <span class="icon">🗂️</span> Мої пацієнти
+          </a>
+          <a routerLink="/user/settings" routerLinkActive="active" class="menu-item">
+            <span class="icon">⚙️</span> Налаштування
+          </a>
+        }
       </div>
     </aside>
   }
