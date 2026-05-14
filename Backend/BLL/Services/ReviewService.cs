@@ -35,7 +35,7 @@ public class ReviewService(IUnitOfWork unitOfWork, IMapper mapper) : IReviewServ
 
         var review = mapper.Map<Review>(dto);
         review.UserId = userId; // Примусово ставимо ID авторизованого юзера
-        review.CreatedAt = DateTime.UtcNow;
+        review.CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
 
         await unitOfWork.ReviewRepository.AddAsync(review);
 

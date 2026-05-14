@@ -9,7 +9,7 @@ public class ReviewProfile : Profile
     {
         // 1. Створення відгуку (DTO -> Entity)
         this.CreateMap<AddReviewDTO, Review>()
-            .ForMember(static dest => dest.CreatedAt, static opt => opt.MapFrom(static _ => DateTime.UtcNow));
+            .ForMember(static dest => dest.CreatedAt, static opt => opt.MapFrom(static _ => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)));
 
         // 2. Оновлення відгуку (DTO -> Entity)
         this.CreateMap<UpdateReviewDTO, Review>();

@@ -84,7 +84,7 @@ public static class ReviewGenerator
                 Rating = rating,
                 Comment = comment,
                 // Залишаємо формат дати як ти просив (якщо працює - не чіпаємо)
-                CreatedAt = faker.Date.Past(1, DateTime.Now)
+                CreatedAt = DateTime.SpecifyKind(faker.Date.Past(1, DateTime.Now), DateTimeKind.Unspecified)
             });
         }
 

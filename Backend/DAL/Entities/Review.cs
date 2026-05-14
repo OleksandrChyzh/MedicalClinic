@@ -8,7 +8,7 @@ public class Review : IBaseEntity
     public int? ServiceId { get; set; }
     public int Rating { get; set; }
     public string? Comment { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     public virtual User User { get; set; } = null!;
     public virtual Doctor? Doctor { get; set; }
     public virtual Service? Service { get; set; }
