@@ -2,9 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common'; // Обов'язково для DatePipe
 import { Router } from '@angular/router';
+import { finalize, switchMap } from 'rxjs/operators';
 import { ClinicService } from '../../core/services/clinic.service';
 import { ReviewService } from '../../core/services/review.service';
 import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 import { Direction, MedicalService, ServiceType } from '../../models/service.models';
 import { Review } from '../../models/review.models';
 
@@ -18,8 +20,15 @@ import { Review } from '../../models/review.models';
 export class ServicesComponent implements OnInit {
   private clinicService = inject(ClinicService);
   private reviewService = inject(ReviewService);
+  private userService = inject(UserService);
   private router = inject(Router);
   readonly auth = inject(AuthService);
+
+  readonly ratingStars = [1, 2, 3, 4, 5] as const;
+  composeRating = signal<number>(5);
+  composeComment = signal<string>('');
+  isSubmittingReview = signal(false);
+  reviewSubmitError = signal<string | null>(null);
 
   // Стан для відгуків
   expandedServices = signal<Set<number>>(new Set());
@@ -73,18 +82,18 @@ export class ServicesComponent implements OnInit {
   toggleReviews(serviceId: number): void {
     const currentExpanded = new Set(this.expandedServices());
 
-    // Якщо вже відкрито - закриваємо
     if (currentExpanded.has(serviceId)) {
       currentExpanded.delete(serviceId);
       this.expandedServices.set(currentExpanded);
       return;
     }
 
-    // Відкриваємо картку
-    currentExpanded.add(serviceId);
-    this.expandedServices.set(currentExpanded);
+    const next = new Set<number>([serviceId]);
+    this.expandedServices.set(next);
+    this.composeRating.set(5);
+    this.composeComment.set('');
+    this.reviewSubmitError.set(null);
 
-    // Якщо відгуки ще не завантажувались - робимо запит
     const currentReviews = this.serviceReviews();
     if (!currentReviews.has(serviceId)) {
       this.setLoadingState(serviceId, true);
@@ -117,6 +126,59 @@ export class ServicesComponent implements OnInit {
   // Допоміжна функція для малювання зірочок
   getStars(rating: number): string {
     return '⭐'.repeat(rating);
+  }
+
+  submitServiceReview(serviceId: number): void {
+    if (!this.auth.isLoggedIn()) return;
+    const rating = this.composeRating();
+    const comment = this.composeComment().trim();
+    if (rating < 1 || rating > 5) return;
+
+    this.isSubmittingReview.set(true);
+    this.reviewSubmitError.set(null);
+
+    this.userService
+      .getProfile()
+      .pipe(
+        switchMap(profile =>
+          this.reviewService.createReview({
+            userId: profile.id,
+            doctorId: null,
+            serviceId,
+            rating,
+            comment: comment || null
+          })
+        ),
+        finalize(() => this.isSubmittingReview.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.composeRating.set(5);
+          this.composeComment.set('');
+          this.reloadServiceReviews(serviceId);
+        },
+        error: (err: unknown) => {
+          console.error('Помилка відправки відгуку', err);
+          const httpErr = err as { error?: string | { message?: string; title?: string } };
+          const body = httpErr?.error;
+          const msg =
+            typeof body === 'string'
+              ? body
+              : body?.message || body?.title || 'Не вдалося надіслати відгук. Спробуйте пізніше.';
+          this.reviewSubmitError.set(msg);
+        }
+      });
+  }
+
+  private reloadServiceReviews(serviceId: number): void {
+    this.reviewService.getReviewsByService(serviceId).subscribe({
+      next: reviews => {
+        const newMap = new Map(this.serviceReviews());
+        newMap.set(serviceId, reviews);
+        this.serviceReviews.set(newMap);
+      },
+      error: err => console.error('Не вдалося оновити список відгуків', err)
+    });
   }
 
   /** Запис: без логіну → /login; з логіном → сторінка записів відкриє модалку з цією послугою (query `bookService`). */
