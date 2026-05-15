@@ -1,0 +1,229 @@
+<div class="page-header">
+  <div>
+    <h1>Мої записи</h1>
+    <p>Переглядайте записи пацієнтів, фільтруйте їх за датою та керуйте статусами.</p>
+  </div>
+
+  <button class="btn-primary" type="button" (click)="openNextAppointmentModal()" [disabled]="patientOptions().length === 0">
+    <span>+</span> Наступний запис
+  </button>
+</div>
+
+<div class="filters-panel">
+  <div class="filter-field">
+    <label>Конкретна дата</label>
+    <input type="date" [value]="selectedDate()" (change)="onDateFilterChange($event)">
+  </div>
+
+  <div class="filter-field">
+    <label>Дати з наявних записів</label>
+    <select [value]="selectedDate()" (change)="onDateFilterChange($event)">
+      <option value="">Усі дати</option>
+      @for (date of uniqueDates(); track date) {
+        <option [value]="date">{{ date }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="filter-field">
+    <label>Статус</label>
+    <select [value]="statusFilter()" (change)="onStatusFilterChange($event)">
+      <option value="">Усі статуси</option>
+      <option value="CREATED">Нові</option>
+      <option value="CONFIRMED">Прийняті</option>
+      <option value="CANCELLED">Відхилені</option>
+      <option value="COMPLETED">Завершені</option>
+    </select>
+  </div>
+
+  <button class="btn-secondary" type="button" (click)="resetFilters()">Скинути</button>
+</div>
+
+@if (isLoading()) {
+  <div class="state-card">
+    <div class="spinner"></div>
+    <p>Завантаження записів...</p>
+  </div>
+} @else if (errorMessage()) {
+  <div class="state-card error-state">
+    <p>{{ errorMessage() }}</p>
+  </div>
+} @else if (appointments().length === 0) {
+  <div class="state-card empty-state">
+    <div class="empty-icon">📅</div>
+    <h3>Записів поки немає</h3>
+    <p>Коли пацієнти запишуться до вас, вони зʼявляться на цій сторінці.</p>
+  </div>
+} @else if (filteredAppointments().length === 0) {
+  <div class="state-card empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>За фільтрами записів не знайдено</h3>
+    <p>Спробуйте змінити дату або статус.</p>
+  </div>
+} @else {
+  <div class="appointments-grid">
+    @for (app of filteredAppointments(); track app.id) {
+      <article class="appointment-card">
+        <div class="card-header">
+          <span class="status-badge" [ngClass]="getStatusClass(app.status)">{{ getStatusLabel(app.status) }}</span>
+          <span class="appointment-id">#{{ app.id }}</span>
+        </div>
+
+        <h3>{{ app.serviceName }}</h3>
+
+        <div class="info-row">
+          <span class="icon">👤</span>
+          <div>
+            <label>Пацієнт</label>
+            <p>{{ app.patientFullName }}</p>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="icon">👥</span>
+          <div>
+            <label>Користувач</label>
+            <p>{{ app.userName }}</p>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="icon">📅</span>
+          <div>
+            <label>Дата та час</label>
+            <p>{{ app.appointmentDate | date: 'dd.MM.yyyy, HH:mm' }}</p>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="icon">⏳</span>
+          <div>
+            <label>Тривалість</label>
+            <p>{{ app.durationMinutes }} хв</p>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          @if (app.status === 'CREATED') {
+            <button class="action-btn accept" type="button" (click)="changeStatus(app, 'CONFIRMED')">Прийняти</button>
+            <button class="action-btn reject" type="button" (click)="changeStatus(app, 'CANCELLED')">Відхилити</button>
+          }
+
+          @if (canComplete(app)) {
+            <button class="action-btn complete" type="button" (click)="changeStatus(app, 'COMPLETED')">Завершити</button>
+          }
+
+          <button class="action-btn next" type="button" (click)="openNextAppointmentModal(app)">Призначити наступний</button>
+        </div>
+      </article>
+    }
+  </div>
+}
+
+@if (isModalOpen()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-window" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Призначити наступний запис</h2>
+        <button class="btn-close" type="button" (click)="closeModal()">×</button>
+      </div>
+
+      <form [formGroup]="appointmentForm" (ngSubmit)="createNextAppointment()">
+        <div class="modal-body">
+        <div class="form-group">
+          <label>1. Оберіть пацієнта:</label>
+          <select formControlName="patientId">
+            <option value="" disabled>Оберіть пацієнта</option>
+            @for (patient of patientOptions(); track patient.patientId) {
+              <option [value]="patient.patientId">
+                {{ patient.patientFullName }} — {{ patient.userName }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>2. Напрямок медичної допомоги:</label>
+          <select formControlName="directionId">
+            <option value="">-- Оберіть напрямок --</option>
+            @for (direction of directions(); track direction.id) {
+              <option [value]="direction.id">{{ direction.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Тип послуги (опціонально):</label>
+          <select formControlName="serviceTypeId">
+            <option value="">Усі типи</option>
+            @for (type of serviceTypes(); track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>3. Послуга клініки:</label>
+          <select formControlName="serviceId">
+            <option value="">-- Спочатку оберіть напрямок --</option>
+            @for (service of filteredServices(); track service.id) {
+              <option [value]="service.id">{{ service.name }} — {{ service.price }} грн</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>4. Оберіть спеціаліста:</label>
+          <select formControlName="doctorId">
+            <option value="">-- Спочатку оберіть напрямок --</option>
+            @for (doctor of filteredDoctors(); track doctor.id) {
+              <option [value]="doctor.id">{{ doctor.fullName }} (досвід: {{ doctor.experienceYears }} р.)</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>5. Оберіть дату візиту:</label>
+          <input type="date" formControlName="date">
+        </div>
+
+        <div class="form-group">
+          <label>6. Доступний час прийому:</label>
+
+          @if (isLoadingSlots()) {
+            <div class="slots-loader">
+              <div class="mini-spinner"></div>
+              Оновлюємо графік лікаря...
+            </div>
+          } @else {
+            <div class="slots-grid">
+              @for (slot of availableSlots(); track slot.startTime) {
+                <label class="slot-radio">
+                  <input type="radio" formControlName="timeSlot" [value]="slot.startTime">
+                  <span class="slot-tile">{{ slot.startTime | slice:0:5 }}</span>
+                </label>
+              } @empty {
+                <p class="no-slots-text">
+                  {{ appointmentForm.get('date')?.value ? 'На вказану дату вільних вікон немає.' : 'Будь ласка, вкажіть лікаря та дату.' }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>7. Тривалість, хв:</label>
+          <input type="number" formControlName="durationMinutes" min="15" max="480" step="15">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" type="button" (click)="closeModal()" [disabled]="isSubmitting()">Скасувати</button>
+          <button class="btn-primary" type="submit" [disabled]="appointmentForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Створення...' : 'Створити запис' }}
+          </button>
+        </div>
+        </div>
+      </form>
+    </div>
+  </div>
+}

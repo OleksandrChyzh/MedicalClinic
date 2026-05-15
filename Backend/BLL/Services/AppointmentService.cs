@@ -10,7 +10,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
     public async Task<IEnumerable<GetAppointmentDTO>> GetAllAppointmentsAsync()
     {
         var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
-            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]
         );
         return mapper.Map<IEnumerable<GetAppointmentDTO>>(appointments);
     }
@@ -19,7 +19,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
     {
         var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
             filter: a => a.UserId == userId,
-            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]
         );
         return mapper.Map<IEnumerable<GetAppointmentDTO>>(appointments);
     }
@@ -28,7 +28,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
     {
         var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
             filter: a => a.DoctorId == doctorId,
-            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]
         );
         return mapper.Map<IEnumerable<GetAppointmentDTO>>(appointments);
     }
@@ -76,7 +76,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
         }
 
         appointment.Status = status;
-        await unitOfWork.AppointmentRepository.UpdateAsync(appointment);
+        await unitOfWork.AppointmentRepository.UpdateStatusAsync(appointment);
     }
 
     // Приватний метод для отримання повного DTO після створення
@@ -84,7 +84,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
     {
         var entity = await unitOfWork.AppointmentRepository.GetFirstOrDefaultAsync(
             filter: a => a.Id == id,
-            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]
         );
         return mapper.Map<GetAppointmentDTO>(entity);
     }
@@ -98,8 +98,15 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
             throw new UnauthorizedAccessException("Ви не зареєстровані як лікар.");
         }
 
-        // Примусово ставимо DoctorId лікаря, який робить запит
-        dto.DoctorId = doctor.Id;
+        var knownPatientAppointment = await unitOfWork.AppointmentRepository.GetFirstOrDefaultAsync(a =>
+            a.DoctorId == doctor.Id &&
+            a.PatientId == dto.PatientId &&
+            a.UserId == dto.UserId);
+
+        if (knownPatientAppointment == null)
+        {
+            throw new UnauthorizedAccessException("Ви можете створювати записи тільки для пацієнтів зі своїх наявних записів.");
+        }
 
         // 2. Валідація часу та розкладу
         await ValidateSlotAvailability(dto);
@@ -172,7 +179,7 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
             // Відфільтровуємо по DoctorId та збігу самої дати (без урахування часу)
             filter: a => a.DoctorId == doctorId && a.AppointmentDate.Date == targetDate.Date,
             // Обов'язково підтягуємо пов'язані сутності для DTO
-            includes: [a => a.Patient, a => a.Doctor, a => a.Service]
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]
         );
 
         // Якщо потрібно, щоб записи йшли по порядку (від ранку до вечора), додаємо сортування:

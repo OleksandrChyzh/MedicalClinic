@@ -20,10 +20,16 @@ export interface AvailableSlotsResponseDTO {
 
 export interface GetAppointmentDTO {
   id: number;
+  patientId: number;
+  userId: number;
+  userName: string;
+  doctorId: number;
+  serviceId: number;
   patientFullName: string;
   doctorFullName: string;
   serviceName: string;
   appointmentDate: string;
   status: string;
   durationMinutes: number;
+  createdAt?: string;
 }

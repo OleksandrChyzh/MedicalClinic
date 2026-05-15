@@ -13,6 +13,10 @@ export class AppointmentService {
     return this.http.post(this.apiUrl, dto);
   }
 
+  createAppointmentByDoctor(dto: AddAppointmentDTO): Observable<GetAppointmentDTO> {
+    return this.http.post<GetAppointmentDTO>(`${this.apiUrl}/doctor`, dto);
+  }
+
   getAvailableSlots(doctorId: number, date: string): Observable<AvailableSlotsResponseDTO> {
     return this.http.get<AvailableSlotsResponseDTO>(`${this.apiUrl}/doctor/${doctorId}/available-slots`, {
       params: { date }
@@ -21,6 +25,20 @@ export class AppointmentService {
 
   getMyAppointments(): Observable<GetAppointmentDTO[]> {
     return this.http.get<GetAppointmentDTO[]>(`${this.apiUrl}/my`);
+  }
+
+  getDoctorAppointments(): Observable<GetAppointmentDTO[]> {
+    return this.http.get<GetAppointmentDTO[]>(`${this.apiUrl}/doctor-schedule`);
+  }
+
+  changeStatus(id: number, status: 'CREATED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, null, {
+      params: { status }
+    });
+  }
+
+  deleteAppointment(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   // 🔴 ДОБАВИВ ЦЕЙ МЕТОД

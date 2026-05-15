@@ -270,6 +270,26 @@ export class AppointmentsComponent implements OnInit {
     this.statusFilter.set('');
   }
 
+  public canDeleteAppointment(appointment: GetAppointmentDTO): boolean {
+    const status = (appointment.status || '').toUpperCase();
+    return status !== 'COMPLETED';
+  }
+
+  public deleteAppointment(appointment: GetAppointmentDTO): void {
+    if (!this.canDeleteAppointment(appointment)) return;
+
+    const confirmed = confirm('Ви дійсно хочете видалити цей запис?');
+    if (!confirmed) return;
+
+    this.appointmentService.deleteAppointment(appointment.id).subscribe({
+      next: () => this.loadAppointments(),
+      error: (err) => {
+        console.error('Помилка видалення запису:', err);
+        alert('Не вдалося видалити запис. Спробуйте ще раз.');
+      }
+    });
+  }
+
   // Попереднє завантаження статичних списків та пацієнтів для модалки
   private loadModalStaticData(): void {
     this.clinicService.getDirections().subscribe(data => this.directions.set(data));
@@ -498,7 +518,7 @@ export class AppointmentsComponent implements OnInit {
     if (!status) return 'status-default';
     switch (status.toLowerCase()) {
       case 'confirmed': case 'підтверджено': return 'status-confirmed';
-      case 'pending': case 'очікується': return 'status-pending';
+      case 'created': case 'pending': case 'очікується': return 'status-pending';
       case 'cancelled': case 'скасовано': return 'status-cancelled';
       default: return 'status-default';
     }

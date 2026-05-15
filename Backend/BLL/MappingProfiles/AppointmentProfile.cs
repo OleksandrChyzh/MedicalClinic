@@ -27,6 +27,9 @@ public class AppointmentProfile : Profile
             .ForMember(dest => dest.ServiceName,
                 opt => opt.MapFrom(src => src.Service.Name))
 
+            .ForMember(dest => dest.UserName,
+                opt => opt.MapFrom(src => src.User.UserName ?? src.User.Email ?? string.Empty))
+
             // Статус Enum -> String
             .ForMember(dest => dest.Status,
                 opt => opt.MapFrom(src => src.Status.ToString()));

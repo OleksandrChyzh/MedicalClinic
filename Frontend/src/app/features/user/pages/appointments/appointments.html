@@ -107,6 +107,14 @@
                     <p>{{ app.durationMinutes }} хв</p>
                   </div>
                 </div>
+
+                @if (canDeleteAppointment(app)) {
+                  <div class="card-actions">
+                    <button type="button" class="btn-delete-appointment" (click)="deleteAppointment(app)">
+                      Видалити запис
+                    </button>
+                  </div>
+                }
               </div>
             </div>
           }

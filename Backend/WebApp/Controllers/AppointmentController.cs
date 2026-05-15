@@ -46,11 +46,50 @@ public class AppointmentController(IAppointmentService appointmentService, IUnit
         return this.Ok(result);
     }
 
+    [Authorize(Roles = "Doctor")]
+    [HttpPost("doctor")]
+    public async Task<IActionResult> CreateByDoctor([FromBody] AddAppointmentDTO dto)
+    {
+        var result = await appointmentService.CreateAppointmentByDoctorAsync(this.CurrentUserId, dto);
+        return this.Ok(result);
+    }
+
     [Authorize(Roles = "Doctor,Admin")]
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> ChangeStatus(int id, [FromQuery] AppointmentStatus status)
     {
+        var appointment = await unitOfWork.AppointmentRepository.GetByIdAsync(id);
+
+        if (this.User.IsInRole("Doctor"))
+        {
+            var doctor = await unitOfWork.DoctorRepository.GetFirstOrDefaultAsync(d => d.UserId == this.CurrentUserId);
+
+            if (doctor == null || appointment == null || appointment.DoctorId != doctor.Id)
+            {
+                return this.Forbid();
+            }
+        }
+
         await appointmentService.ChangeStatusAsync(id, status);
+        return this.NoContent();
+    }
+
+    [Authorize(Roles = "User,Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var appointment = await unitOfWork.AppointmentRepository.GetByIdAsync(id);
+        if (appointment == null)
+        {
+            return this.NotFound();
+        }
+
+        if (this.User.IsInRole("User") && appointment.UserId != this.CurrentUserId)
+        {
+            return this.Forbid();
+        }
+
+        await unitOfWork.AppointmentRepository.DeleteAsync(appointment);
         return this.NoContent();
     }
 
