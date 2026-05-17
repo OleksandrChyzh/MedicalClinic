@@ -44,10 +44,17 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
         }
 
         // Перевірка існування послуги
-        var serviceExists = await unitOfWork.ServiceRepository.GetByIdAsync(dto.ServiceId) != null;
-        if (!serviceExists)
+        var service = await unitOfWork.ServiceRepository.GetFirstOrDefaultAsync(
+            filter: s => s.Id == dto.ServiceId,
+            includes: s => s.ServiceType);
+        if (service == null)
         {
             throw new KeyNotFoundException("Послугу не знайдено.");
+        }
+
+        if (IsTreatmentServiceType(service.ServiceType.Name))
+        {
+            throw new InvalidOperationException("Запис на лікування може створити тільки лікар після консультації.");
         }
 
         // Перевірка розкладу
@@ -65,6 +72,17 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
         await unitOfWork.AppointmentRepository.AddAsync(appointment);
 
         return await GetAppointmentByIdInternal(appointment.Id);
+    }
+
+    private static bool IsTreatmentServiceType(string? serviceTypeName)
+    {
+        if (string.IsNullOrWhiteSpace(serviceTypeName))
+        {
+            return false;
+        }
+
+        var normalized = serviceTypeName.Trim().ToLowerInvariant();
+        return normalized.Contains("лікуван") || normalized.Contains("лiкуван") || normalized.Contains("treatment");
     }
 
     public async Task ChangeStatusAsync(int appointmentId, AppointmentStatus status)

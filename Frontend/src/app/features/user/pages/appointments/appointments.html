@@ -175,6 +175,13 @@
           </select>
         </div>
 
+        @if (treatmentBookingMessage()) {
+          <div class="booking-warning">
+            <strong>Запис недоступний</strong>
+            <span>{{ treatmentBookingMessage() }}</span>
+          </div>
+        }
+
         <div class="form-group">
           <label for="doctorSelect">4. Оберіть спеціаліста:</label>
           <select id="doctorSelect" formControlName="doctorId" class="form-control">
@@ -201,7 +208,7 @@
             <div class="slots-grid">
               @for (slot of availableSlots(); track slot.startTime) {
                 <label class="slot-radio">
-                  <input type="radio" formControlName="timeSlot" [value]="slot" />
+                  <input type="radio" formControlName="timeSlot" [value]="slot.startTime" />
                   <span class="slot-tile">
                     {{ slot.startTime | slice:0:5 }}
                   </span>
@@ -223,7 +230,7 @@
         </button>
         <button type="button" class="btn-primary"
                 (click)="onCreateAppointment()"
-                [disabled]="appointmentForm.invalid || isSubmitting()">
+                [disabled]="appointmentForm.invalid || isSubmitting() || isTreatmentBookingBlocked()">
           {{ isSubmitting() ? 'Обробка...' : 'Підтвердити запис' }}
         </button>
       </div>

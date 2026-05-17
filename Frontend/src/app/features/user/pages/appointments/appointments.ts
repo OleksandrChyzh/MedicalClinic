@@ -108,6 +108,7 @@ export class AppointmentsComponent implements OnInit {
   public filteredServices = signal<MedicalService[]>([]);
   public filteredDoctors = signal<Doctor[]>([]);
   public availableSlots = signal<FreeSlotDTO[]>([]);
+  public treatmentBookingMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -213,7 +214,12 @@ export class AppointmentsComponent implements OnInit {
     // Слідкуємо за зміною Типу Послуги (Консультація, Аналізи і т.д.)
     this.appointmentForm.get('serviceTypeId')?.valueChanges.subscribe(typeId => {
       const directionId = this.appointmentForm.get('directionId')?.value;
+      this.validateTreatmentSelection();
       this.loadServices(directionId, typeId);
+    });
+
+    this.appointmentForm.get('serviceId')?.valueChanges.subscribe(() => {
+      this.validateTreatmentSelection();
     });
 
     // Слідкуємо за зміною Лікаря — Активуємо/деактивуємо дату та завантажуємо слоти
@@ -308,6 +314,7 @@ export class AppointmentsComponent implements OnInit {
     const doctorCtrl = this.appointmentForm.get('doctorId');
     const typeId = this.appointmentForm.get('serviceTypeId')?.value;
 
+    this.treatmentBookingMessage.set(null);
     this.resetFromDate();
 
     if (!directionId) {
@@ -337,9 +344,44 @@ export class AppointmentsComponent implements OnInit {
   private loadServices(directionId: number | null, typeId: number | null): void {
     if (!directionId) return;
     this.clinicService.getServices(directionId, typeId).subscribe({
-      next: (services) => this.filteredServices.set(services),
+      next: (services) => {
+        this.filteredServices.set(services);
+        this.validateTreatmentSelection();
+      },
       error: (err) => console.error('Помилка фільтрації послуг:', err)
     });
+  }
+
+  public isTreatmentBookingBlocked(): boolean {
+    return this.treatmentBookingMessage() !== null;
+  }
+
+  private validateTreatmentSelection(): void {
+    const typeId = this.appointmentForm.get('serviceTypeId')?.value;
+    const serviceId = this.appointmentForm.get('serviceId')?.value;
+    const selectedType = typeId ? this.serviceTypes().find(type => type.id === +typeId) : null;
+    const selectedService = serviceId ? this.filteredServices().find(service => service.id === +serviceId) : null;
+    const serviceType = selectedService?.typeId
+      ? this.serviceTypes().find(type => type.id === selectedService.typeId)
+      : null;
+    const isTreatment = this.isTreatmentServiceType(selectedType?.name) || this.isTreatmentServiceType(serviceType?.name);
+
+    if (!isTreatment) {
+      this.treatmentBookingMessage.set(null);
+      return;
+    }
+
+    this.treatmentBookingMessage.set('Запис на лікування створює лікар після консультації або діагностики. Будь ласка, спочатку запишіться на консультацію чи діагностику.');
+    this.appointmentForm.get('serviceId')?.setValue('', { emitEvent: false });
+    this.appointmentForm.get('doctorId')?.setValue('', { emitEvent: false });
+    this.resetFromDate();
+  }
+
+  private isTreatmentServiceType(name?: string | null): boolean {
+    if (!name) return false;
+
+    const normalized = name.trim().toLowerCase();
+    return normalized.includes('лікуван') || normalized.includes('лiкуван') || normalized.includes('treatment');
   }
 
   // Завантаження вільних часових вікон з бекенду
@@ -394,6 +436,7 @@ export class AppointmentsComponent implements OnInit {
       date: '',
       timeSlot: ''
     });
+    this.treatmentBookingMessage.set(null);
     this.isModalOpen.set(true);
   }
 
@@ -423,6 +466,7 @@ export class AppointmentsComponent implements OnInit {
         this.filteredServices.set(services);
         serviceCtrl?.enable({ emitEvent: false });
         serviceCtrl?.setValue(String(prefill.serviceId), { emitEvent: false });
+        this.validateTreatmentSelection();
       },
       error: (err) => console.error('Помилка завантаження послуг (prefill):', err)
     });
@@ -480,11 +524,16 @@ export class AppointmentsComponent implements OnInit {
 
   // Створення нового запису на прийом
   public onCreateAppointment(): void {
-    if (this.appointmentForm.invalid) return;
+    this.validateTreatmentSelection();
+    if (this.appointmentForm.invalid || this.isTreatmentBookingBlocked()) return;
 
     this.isSubmitting.set(true);
     const formValue = this.appointmentForm.value;
-    const selectedSlot: FreeSlotDTO = formValue.timeSlot;
+    const selectedSlot = this.availableSlots().find(slot => slot.startTime === formValue.timeSlot);
+    if (!selectedSlot) {
+      this.isSubmitting.set(false);
+      return;
+    }
 
     // Склеюємо Дату візиту та StartTime обраного слоту в ISO формат
     const fullIsoDateTime = `${formValue.date}T${selectedSlot.startTime}`;

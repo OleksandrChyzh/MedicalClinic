@@ -257,6 +257,26 @@
   &:disabled { background-color: #f8fafc; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
 }
 
+.booking-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+
+  strong {
+    font-size: 0.92rem;
+  }
+
+  span {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+}
+
 // Розумна індикація та сітка для слотів часу
 .slots-grid {
   display: grid;
