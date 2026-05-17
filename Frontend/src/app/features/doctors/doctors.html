@@ -2,8 +2,13 @@
   <div class="services-page__container">
 
     <div class="services-page__header">
-      <h1 class="title">Наші лікарі</h1>
-      <p class="subtitle">Оберіть спеціаліста для отримання кваліфікованої допомоги.</p>
+      <div>
+        <h1 class="title">Наші лікарі</h1>
+        <p class="subtitle">Оберіть спеціаліста для отримання кваліфікованої допомоги.</p>
+      </div>
+      @if (isAdmin()) {
+        <button class="btn btn-primary" (click)="startCreate()">+ Додати лікаря</button>
+      }
     </div>
 
     <div class="filter-panel card">
@@ -25,6 +30,43 @@
         <button class="btn btn-outline" (click)="resetFilter()">Скинути фільтри</button>
       </div>
     </div>
+
+    @if (isFormOpen()) {
+      <form class="card admin-form" (ngSubmit)="saveDoctor()">
+        <h2>{{ editingDoctorId() ? 'Редагувати лікаря' : 'Новий лікар' }}</h2>
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
+        }
+        <div class="form-grid">
+          <label>Напрямок<select [(ngModel)]="form.directionId" name="directionId" required><option [ngValue]="0">Оберіть</option>@for (d of adminDirections(); track d.id) {<option [ngValue]="d.id">{{ d.name }}</option>}</select></label>
+          <label>Прізвище<input [(ngModel)]="form.lastName" name="lastName" required /></label>
+          <label>Ім'я<input [(ngModel)]="form.firstName" name="firstName" required /></label>
+          <label>По батькові<input [(ngModel)]="form.middleName" name="middleName" /></label>
+          <label>Досвід<input type="number" [(ngModel)]="form.experienceYears" name="experienceYears" min="0" /></label>
+          <label class="full-width">Опис<textarea [(ngModel)]="form.description" name="description"></textarea></label>
+          @if (!editingDoctorId()) {
+            <label>Email акаунта<input type="email" [(ngModel)]="form.account.email" name="email" required /></label>
+            <label>Логін<input [(ngModel)]="form.account.userName" name="userName" required /></label>
+            <label>Телефон<input [(ngModel)]="form.account.phoneNumber" name="phoneNumber" /></label>
+            <label>Пароль<input type="password" [(ngModel)]="form.account.password" name="password" required /></label>
+          }
+        </div>
+        <div class="schedule-editor">
+          <h3>Розклад лікаря</h3>
+          @for (item of schedule(); track item.weekDay) {
+            <div class="schedule-row">
+              <strong>{{ item.weekDay }}</strong>
+              <input type="time" [(ngModel)]="item.startTime" [name]="item.weekDay + 'start'" />
+              <input type="time" [(ngModel)]="item.endTime" [name]="item.weekDay + 'end'" />
+            </div>
+          }
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" (click)="cancelForm()">Скасувати</button>
+          <button class="btn btn-primary" type="submit">Зберегти</button>
+        </div>
+      </form>
+    }
 
     @if (isLoading()) {
       <div class="loading-spinner">Завантаження спеціалістів...</div>
@@ -64,6 +106,10 @@
 
               <div class="service-card__footer" style="justify-content: flex-end;">
                 <div class="actions-group">
+                  @if (isAdmin()) {
+                    <button class="btn btn-outline btn-sm" (click)="editDoctor(doc)">Редагувати</button>
+                    <button class="btn btn-danger btn-sm" (click)="deleteDoctor(doc.id)">Видалити</button>
+                  }
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(doc.id)">
                     {{ expandedDoctors().has(doc.id) ? 'Сховати' : 'Відгуки' }}
                   </button>

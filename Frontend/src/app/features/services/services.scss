@@ -410,3 +410,75 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+// Адмін-форма
+.admin-form {
+  margin-bottom: 2rem;
+  padding: 2rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: var(--text-main);
+
+      &.full-width {
+        grid-column: 1 / -1;
+      }
+
+      input, select, textarea {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-family: inherit;
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary);
+        }
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+    }
+  }
+
+  .error-message {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  .btn-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    &:hover {
+      background: #fecaca;
+    }
+  }
+}

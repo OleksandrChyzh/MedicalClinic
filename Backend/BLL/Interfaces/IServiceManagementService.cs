@@ -7,4 +7,5 @@ public interface IServiceManagementService
     Task<GetServiceDTO> GetServiceByIdAsync(int id);
     Task<GetServiceDTO> CreateServiceAsync(AddServiceDTO dto);
     Task UpdateServiceAsync(int id, UpdateServiceDTO dto);
+    Task DeleteServiceAsync(int id);
 }

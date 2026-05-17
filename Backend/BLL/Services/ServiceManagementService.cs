@@ -81,4 +81,15 @@ public class ServiceManagementService(IUnitOfWork unitOfWork, IMapper mapper) : 
         // У BaseRepository метод UpdateAsync також викликає SaveChangesAsync
         await unitOfWork.ServiceRepository.UpdateAsync(service);
     }
+
+    public async Task DeleteServiceAsync(int id)
+    {
+        var service = await unitOfWork.ServiceRepository.GetByIdAsync(id);
+        if (service == null)
+        {
+            throw new KeyNotFoundException($"Послугу з ID {id} не знайдено.");
+        }
+
+        await unitOfWork.ServiceRepository.DeleteAsync(service);
+    }
 }

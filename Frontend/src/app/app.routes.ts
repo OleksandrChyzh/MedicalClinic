@@ -82,6 +82,17 @@ export const routes: Routes = [
           { path: 'appointments', component: DoctorAppointmentsComponent, title: 'Мої записи' },
           { path: 'schedule', component: DoctorScheduleComponent, title: 'Мій розклад' }
         ]
+      },
+      {
+        path: 'admin',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Admin'] },
+        children: [
+          { path: '', redirectTo: 'users', pathMatch: 'full' },
+          { path: 'users', loadComponent: () => import('./features/admin/pages/users/admin-users').then(m => m.AdminUsersComponent), title: 'Користувачі' },
+          { path: 'appointments', loadComponent: () => import('./features/admin/pages/appointments/admin-appointments').then(m => m.AdminAppointmentsComponent), title: 'Всі записи' },
+          { path: 'statistics', loadComponent: () => import('./features/admin/pages/statistics/admin-statistics').then(m => m.AdminStatisticsComponent), title: 'Статистика' }
+        ]
       }
     ]
   },

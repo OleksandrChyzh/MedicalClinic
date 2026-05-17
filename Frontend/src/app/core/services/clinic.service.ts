@@ -34,4 +34,16 @@ export class ClinicService {
   getServiceById(id: number): Observable<MedicalService> {
     return this.http.get<MedicalService>(`${this.baseUrl}/Service/${id}`);
   }
+
+  createService(dto: any): Observable<MedicalService> {
+    return this.http.post<MedicalService>(`${this.baseUrl}/Service`, dto);
+  }
+
+  updateService(id: number, dto: any): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/Service/${id}`, dto);
+  }
+
+  deleteService(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/Service/${id}`);
+  }
 }

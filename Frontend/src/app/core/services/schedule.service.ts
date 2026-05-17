@@ -17,4 +17,16 @@ export class ScheduleService {
   getDoctorSchedule(doctorId: number): Observable<Schedule[]> {
     return this.http.get<Schedule[]>(`${this.apiUrl}/doctor/${doctorId}`);
   }
+
+  createSchedule(dto: any): Observable<Schedule> {
+    return this.http.post<Schedule>(this.apiUrl, dto);
+  }
+
+  updateSchedule(dto: any): Observable<void> {
+    return this.http.put<void>(this.apiUrl, dto);
+  }
+
+  deleteSchedule(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

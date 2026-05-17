@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common'; // Обов'язково для DatePipe
 import { Router } from '@angular/router';
@@ -216,5 +216,66 @@ export class ServicesComponent implements OnInit {
     void this.router.navigate(['/user/appointments'], {
       queryParams: { bookService: service.id }
     });
+  }
+
+  // --- АДМІН-ФУНКЦІЇ ---
+  isAdmin = computed(() => this.auth.getUserRoles().includes('Admin'));
+  isFormOpen = signal(false);
+  editingServiceId = signal<number | null>(null);
+  errorMessage = signal<string | null>(null);
+  form: any = this.createEmptyForm();
+
+  startCreate(): void {
+    this.editingServiceId.set(null);
+    this.form = this.createEmptyForm();
+    this.errorMessage.set(null);
+    this.isFormOpen.set(true);
+  }
+
+  editService(service: MedicalService): void {
+    this.editingServiceId.set(service.id);
+    this.form = { id: service.id, name: service.name, description: service.description || '', price: service.price };
+    this.errorMessage.set(null);
+    this.isFormOpen.set(true);
+  }
+
+  saveService(): void {
+    this.errorMessage.set(null);
+    const id = this.editingServiceId();
+    if (id) {
+      this.clinicService.updateService(id, { ...this.form, id }).subscribe({
+        next: () => { this.cancelForm(); this.loadServices(); },
+        error: (err) => this.handleError(err)
+      });
+    } else {
+      this.clinicService.createService(this.form).subscribe({
+        next: () => { this.cancelForm(); this.loadServices(); },
+        error: (err) => this.handleError(err)
+      });
+    }
+  }
+
+  private handleError(err: any): void {
+    console.error('Помилка при збереженні послуги:', err);
+    if (err.status === 400 || err.error?.errors) {
+      this.errorMessage.set('Перевірте введені дані.');
+    } else {
+      this.errorMessage.set('Сталася помилка при збереженні послуги.');
+    }
+  }
+
+  deleteService(id: number): void {
+    if (!confirm('Видалити послугу?')) return;
+    this.clinicService.deleteService(id).subscribe(() => this.loadServices());
+  }
+
+  cancelForm(): void {
+    this.isFormOpen.set(false);
+    this.editingServiceId.set(null);
+    this.errorMessage.set(null);
+  }
+
+  private createEmptyForm(): any {
+    return { name: '', description: '', price: 0, directionId: 0, typeId: 0 };
   }
 }

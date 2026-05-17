@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AddAppointmentDTO, AvailableSlotsResponseDTO, GetAppointmentDTO } from '../../models/appointment.model';
 import { MedicalService } from '../../models/service.models';
@@ -39,6 +39,13 @@ export class AppointmentService {
 
   deleteAppointment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getAdminReport(from?: string, to?: string): Observable<{ items: any[]; revenue: number }> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get<{ items: any[]; revenue: number }>(`${this.apiUrl}/admin/report`, { params });
   }
 
   // 🔴 ДОБАВИВ ЦЕЙ МЕТОД

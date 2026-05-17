@@ -25,4 +25,16 @@ export class DoctorService {
   getMyProfile(): Observable<DoctorProfile> {
     return this.http.get<DoctorProfile>(`${this.apiUrl}/profile`);
   }
+
+  createDoctor(dto: any): Observable<Doctor> {
+    return this.http.post<Doctor>(this.apiUrl, dto);
+  }
+
+  updateDoctor(id: number, dto: any): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, dto);
+  }
+
+  deleteDoctor(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

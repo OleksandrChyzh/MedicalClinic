@@ -22,6 +22,10 @@ export const roleGuard: CanActivateFn = route => {
     return true;
   }
 
+  if (userRoles.includes('Admin')) {
+    return router.parseUrl('/admin/doctors');
+  }
+
   if (userRoles.includes('Doctor')) {
     return router.parseUrl('/doctor/profile');
   }

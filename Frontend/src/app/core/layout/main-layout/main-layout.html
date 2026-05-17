@@ -4,7 +4,17 @@
   @if (isLoggedIn()) {
     <aside class="dashboard-sidebar">
       <div class="sidebar-menu">
-        @if (hasRole('Doctor')) {
+        @if (hasRole('Admin')) {
+          <a routerLink="/admin/users" routerLinkActive="active" class="menu-item">
+            <span class="icon">👥</span> Користувачі
+          </a>
+          <a routerLink="/admin/appointments" routerLinkActive="active" class="menu-item">
+            <span class="icon">📅</span> Всі записи
+          </a>
+          <a routerLink="/admin/statistics" routerLinkActive="active" class="menu-item">
+            <span class="icon">📊</span> Статистика
+          </a>
+        } @else if (hasRole('Doctor')) {
           <a routerLink="/doctor/appointments" routerLinkActive="active" class="menu-item">
             <span class="icon">📅</span> Мої записи
           </a>

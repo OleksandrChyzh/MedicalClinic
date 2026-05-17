@@ -2,8 +2,13 @@
   <div class="services-page__container">
 
     <div class="services-page__header">
-      <h1 class="title">Наші медичні послуги</h1>
-      <p class="subtitle">Оберіть потрібний напрямок або тип послуги для швидкого пошуку.</p>
+      <div>
+        <h1 class="title">Наші медичні послуги</h1>
+        <p class="subtitle">Оберіть потрібний напрямок або тип послуги для швидкого пошуку.</p>
+      </div>
+      @if (isAdmin()) {
+        <button class="btn btn-primary" (click)="startCreate()">+ Додати послугу</button>
+      }
     </div>
 
     <div class="filter-panel card">
@@ -40,6 +45,28 @@
       </div>
     </div>
 
+    @if (isFormOpen()) {
+      <form class="card admin-form" (ngSubmit)="saveService()">
+        <h2>{{ editingServiceId() ? 'Редагувати послугу' : 'Нова послуга' }}</h2>
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
+        }
+        <div class="form-grid">
+          <label>Назва<input [(ngModel)]="form.name" name="name" required /></label>
+          <label>Ціна<input type="number" [(ngModel)]="form.price" name="price" min="1" required /></label>
+          @if (!editingServiceId()) {
+            <label>Напрямок<select [(ngModel)]="form.directionId" name="directionId" required><option [ngValue]="0">Оберіть</option>@for (d of directions(); track d.id) {<option [ngValue]="d.id">{{ d.name }}</option>}</select></label>
+            <label>Тип<select [(ngModel)]="form.typeId" name="typeId" required><option [ngValue]="0">Оберіть</option>@for (t of serviceTypes(); track t.id) {<option [ngValue]="t.id">{{ t.name }}</option>}</select></label>
+          }
+          <label class="full-width">Опис<textarea [(ngModel)]="form.description" name="description"></textarea></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" (click)="cancelForm()">Скасувати</button>
+          <button class="btn btn-primary" type="submit">Зберегти</button>
+        </div>
+      </form>
+    }
+
     @if (isLoading()) {
       <div class="loading-spinner">Завантаження послуг...</div>
     } @else {
@@ -71,6 +98,10 @@
                 <div class="price">{{ service.price }} грн</div>
 
                 <div class="actions-group">
+                  @if (isAdmin()) {
+                    <button class="btn btn-outline btn-sm" (click)="editService(service)">Редагувати</button>
+                    <button class="btn btn-danger btn-sm" (click)="deleteService(service.id)">Видалити</button>
+                  }
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(service.id)">
                     {{ expandedServices().has(service.id) ? 'Сховати' : 'Відгуки' }}
                   </button>

@@ -47,4 +47,12 @@ public class ServiceController(IServiceManagementService service) : ControllerBa
         await service.UpdateServiceAsync(id, dto);
         return this.NoContent();
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteService(int id)
+    {
+        await service.DeleteServiceAsync(id);
+        return this.NoContent();
+    }
 }

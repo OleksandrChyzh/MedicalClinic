@@ -19,6 +19,41 @@ public class AppointmentController(IAppointmentService appointmentService, IUnit
     [HttpGet("all")]
     public async Task<IActionResult> GetAll() => this.Ok(await appointmentService.GetAllAppointmentsAsync());
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin/report")]
+    public async Task<IActionResult> GetAdminReport([FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        var appointments = await unitOfWork.AppointmentRepository.GetAllAsync(
+            filter: a => (!from.HasValue || a.AppointmentDate >= from.Value) &&
+                         (!to.HasValue || a.AppointmentDate <= to.Value),
+            includes: [a => a.Patient, a => a.User, a => a.Doctor, a => a.Service]);
+
+        var ordered = appointments.OrderByDescending(a => a.AppointmentDate).ToList();
+        var items = ordered.Select(a => new
+        {
+            a.Id,
+            a.PatientId,
+            PatientFullName = $"{a.Patient.FirstName} {a.Patient.LastName}",
+            a.UserId,
+            UserName = a.User.UserName ?? a.User.Email ?? string.Empty,
+            a.DoctorId,
+            DoctorFullName = $"{a.Doctor.FirstName} {a.Doctor.LastName}",
+            a.ServiceId,
+            ServiceName = a.Service.Name,
+            ServicePrice = a.Service.Price,
+            a.AppointmentDate,
+            Status = a.Status.ToString(),
+            a.DurationMinutes,
+            a.CreatedAt
+        });
+
+        var revenue = ordered
+            .Where(a => a.Status != AppointmentStatus.CANCELLED)
+            .Sum(a => a.Service.Price);
+
+        return this.Ok(new { items, revenue });
+    }
+
     [HttpGet("my")]
     public async Task<IActionResult> GetMyAppointments()
     {

@@ -503,3 +503,108 @@ h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: #0f172a; }
   font-weight: 500;
   font-size: 1.1rem;
 }
+
+// Адмін-форма
+.admin-form {
+  margin-bottom: 2rem;
+  padding: 2rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #0f172a;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #334155;
+
+      &.full-width {
+        grid-column: 1 / -1;
+      }
+
+      input, select, textarea {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+
+        &:focus {
+          outline: none;
+          border-color: #0ea5e9;
+        }
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+    }
+  }
+
+  .schedule-editor {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+
+    h3 {
+      margin-bottom: 1rem;
+      color: #0f172a;
+      font-size: 1.1rem;
+    }
+
+    .schedule-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 120px;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+
+      strong {
+        font-weight: 600;
+        color: #334155;
+      }
+
+      input {
+        padding: 0.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .error-message {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  .btn-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    &:hover {
+      background: #fecaca;
+    }
+  }
+}
