@@ -14,19 +14,27 @@ public class UserController(IUserService userService, UserManager<User> userMana
 {
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
         var users = userManager.Users
             .OrderBy(u => u.Id)
             .ToList()
-            .Select(u => new
+            .Select(async u => new
             {
                 u.Id,
                 u.Email,
                 u.UserName,
                 u.PhoneNumber,
-                IsBlocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTimeOffset.UtcNow
+                IsBlocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTimeOffset.UtcNow,
+                Roles = (await userManager.GetRolesAsync(u)).FirstOrDefault() ?? "Клієнт",
+                RoleDisplay = (await userManager.GetRolesAsync(u)).FirstOrDefault() switch
+                {
+                    "Doctor" => "Лікар",
+                    "Admin" => "Адмін",
+                    _ => "Клієнт"
+                }
             })
+            .Select(t => t.Result)
             .ToList();
 
         return this.Ok(users);
@@ -40,6 +48,12 @@ public class UserController(IUserService userService, UserManager<User> userMana
         if (user == null)
         {
             return this.NotFound();
+        }
+
+        // Переконаємося, що SecurityStamp встановлено
+        if (string.IsNullOrEmpty(user.SecurityStamp))
+        {
+            await userManager.UpdateSecurityStampAsync(user);
         }
 
         user.LockoutEnabled = true;

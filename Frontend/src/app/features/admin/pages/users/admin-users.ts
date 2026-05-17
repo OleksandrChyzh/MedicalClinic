@@ -10,9 +10,9 @@ import { AdminService, AdminUser } from '../../../../core/services/admin.service
     <section class="admin-page">
       <div class="page-header"><div><p class="eyebrow">Адмін-панель</p><h1>Користувачі</h1><p>Перегляд користувачів і блокування доступу.</p></div></div>
       <div class="panel table-wrap">
-        <table><thead><tr><th>ID</th><th>Email</th><th>Логін</th><th>Телефон</th><th>Статус</th><th></th></tr></thead><tbody>
+        <table><thead><tr><th>ID</th><th>Email</th><th>Логін</th><th>Телефон</th><th>Роль</th><th></th></tr></thead><tbody>
           @for (user of users(); track user.id) {
-            <tr><td>#{{ user.id }}</td><td>{{ user.email }}</td><td>{{ user.userName }}</td><td>{{ user.phoneNumber || '—' }}</td><td><span [class.blocked]="user.isBlocked" class="status">{{ user.isBlocked ? 'Заблокований' : 'Активний' }}</span></td><td><button [class.danger]="!user.isBlocked" (click)="toggleBlock(user)">{{ user.isBlocked ? 'Розблокувати' : 'Заблокувати' }}</button></td></tr>
+            <tr><td>#{{ user.id }}</td><td>{{ user.email }}</td><td>{{ user.userName }}</td><td>{{ user.phoneNumber || '—' }}</td><td>{{ user.roleDisplay }}</td><td><button [class.danger]="!user.isBlocked" (click)="toggleBlock(user)">{{ user.isBlocked ? 'Розблокувати' : 'Заблокувати' }}</button></td></tr>
           }
         </tbody></table>
       </div>

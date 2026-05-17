@@ -8,6 +8,8 @@ export interface AdminUser {
   userName: string;
   phoneNumber?: string | null;
   isBlocked: boolean;
+  roleDisplay: string;
+  role?: string;
 }
 
 @Injectable({ providedIn: 'root' })
