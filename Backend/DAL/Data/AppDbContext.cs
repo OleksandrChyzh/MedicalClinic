@@ -172,9 +172,6 @@ public class AppDbContext : IdentityDbContext<
         {
             b.ToTable("Appointments", t =>
             {
-                // ЗМІНЕНО: Використовуємо LOCALTIMESTAMP замість NOW(), бо колонка тепер без часового поясу
-                t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= LOCALTIMESTAMP");
-
                 // НОВА ПЕРЕВІРКА: Тривалість прийому має бути більше нуля
                 t.HasCheckConstraint("CHK_Appointment_Duration_Positive", "\"DurationMinutes\" > 0");
             });

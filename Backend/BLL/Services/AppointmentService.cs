@@ -146,6 +146,11 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
         var start = dto.AppointmentDate;
         var end = start.AddMinutes(dto.DurationMinutes);
 
+        if (start <= DateTime.Now)
+        {
+            throw new InvalidOperationException("Неможливо створити запис на дату або час, що вже минули.");
+        }
+
         // 1. Створюємо словник для перекладу днів тижня на українську
         var dayOfWeekDict = new Dictionary<DayOfWeek, string>
     {

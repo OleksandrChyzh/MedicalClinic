@@ -71,8 +71,6 @@ namespace DAL.Migrations
 
                     b.ToTable("Appointments", null, t =>
                         {
-                            t.HasCheckConstraint("CHK_Appointment_Date_Future", "\"AppointmentDate\" >= LOCALTIMESTAMP");
-
                             t.HasCheckConstraint("CHK_Appointment_Duration_Positive", "\"DurationMinutes\" > 0");
                         });
                 });
