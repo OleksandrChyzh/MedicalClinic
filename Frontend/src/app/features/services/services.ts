@@ -224,12 +224,31 @@ export class ServicesComponent implements OnInit {
   editingServiceId = signal<number | null>(null);
   errorMessage = signal<string | null>(null);
   form: any = this.createEmptyForm();
+  activeMenu = signal<number | null>(null);
 
   startCreate(): void {
     this.editingServiceId.set(null);
     this.form = this.createEmptyForm();
     this.errorMessage.set(null);
     this.isFormOpen.set(true);
+  }
+
+  toggleMenu(id: number): void {
+    this.activeMenu.set(this.activeMenu() === id ? null : id);
+  }
+
+  closeMenu(): void {
+    this.activeMenu.set(null);
+  }
+
+  getMenuPosition(id: number): { top: string; right: string } {
+    const button = document.querySelector(`[data-menu-id="${id}"]`) as HTMLElement;
+    if (!button) return { top: '0', right: '0' };
+    const rect = button.getBoundingClientRect();
+    return {
+      top: `${rect.bottom + 4}px`,
+      right: `${window.innerWidth - rect.right}px`
+    };
   }
 
   editService(service: MedicalService): void {

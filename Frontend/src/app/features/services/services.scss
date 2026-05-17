@@ -93,7 +93,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 0; /* Скидаємо стандартний padding .card для власного компонування */
-  overflow: hidden;
+  overflow: visible;
   transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
@@ -479,6 +479,68 @@
     border: 1px solid #fecaca;
     &:hover {
       background: #fecaca;
+    }
+  }
+
+  .btn-icon {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  }
+}
+
+// Dropdown меню
+.dropdown {
+  position: relative;
+
+  &.open .dropdown-menu {
+    display: block;
+  }
+}
+
+.dropdown-menu {
+  display: none;
+  position: fixed;
+  background: #ffffff;
+  border: 2px solid #0ea5e9;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  min-width: 150px;
+  z-index: 9999;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &--danger {
+    color: #b91c1c;
+
+    &:hover {
+      background: #fee2e2;
     }
   }
 }

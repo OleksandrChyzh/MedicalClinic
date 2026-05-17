@@ -99,8 +99,17 @@
 
                 <div class="actions-group">
                   @if (isAdmin()) {
-                    <button class="btn btn-outline btn-sm" (click)="editService(service)">Редагувати</button>
-                    <button class="btn btn-danger btn-sm" (click)="deleteService(service.id)">Видалити</button>
+                    <div class="dropdown" [class.open]="activeMenu() === service.id">
+                      <button class="btn btn-icon" data-menu-id="{{ service.id }}" (click)="toggleMenu(service.id)">
+                        ⋯
+                      </button>
+                      @if (activeMenu() === service.id) {
+                        <div class="dropdown-menu" [style.top]="getMenuPosition(service.id).top" [style.right]="getMenuPosition(service.id).right">
+                          <button class="dropdown-item" (click)="editService(service); closeMenu()">Редагувати</button>
+                          <button class="dropdown-item dropdown-item--danger" (click)="deleteService(service.id); closeMenu()">Видалити</button>
+                        </div>
+                      }
+                    </div>
                   }
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(service.id)">
                     {{ expandedServices().has(service.id) ? 'Сховати' : 'Відгуки' }}

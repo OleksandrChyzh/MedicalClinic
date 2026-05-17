@@ -18,6 +18,7 @@ public class UserController(IUserService userService, UserManager<User> userMana
     {
         var users = userManager.Users
             .OrderBy(u => u.Id)
+            .ToList()
             .Select(u => new
             {
                 u.Id,

@@ -242,6 +242,7 @@ export class DoctorsComponent implements OnInit {
   errorMessage = signal<string | null>(null);
   readonly weekDays = ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота', 'Неділя'];
   form: any = this.createEmptyForm();
+  activeMenu = signal<number | null>(null);
 
   startCreate(): void {
     this.editingDoctorId.set(null);
@@ -249,6 +250,24 @@ export class DoctorsComponent implements OnInit {
     this.schedule.set(this.defaultSchedule());
     this.errorMessage.set(null);
     this.isFormOpen.set(true);
+  }
+
+  toggleMenu(id: number): void {
+    this.activeMenu.set(this.activeMenu() === id ? null : id);
+  }
+
+  closeMenu(): void {
+    this.activeMenu.set(null);
+  }
+
+  getMenuPosition(id: number): { top: string; right: string } {
+    const button = document.querySelector(`[data-menu-id="${id}"]`) as HTMLElement;
+    if (!button) return { top: '0', right: '0' };
+    const rect = button.getBoundingClientRect();
+    return {
+      top: `${rect.bottom + 4}px`,
+      right: `${window.innerWidth - rect.right}px`
+    };
   }
 
   editDoctor(doctor: Doctor): void {

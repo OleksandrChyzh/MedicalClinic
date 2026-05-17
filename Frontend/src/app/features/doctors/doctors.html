@@ -107,8 +107,17 @@
               <div class="service-card__footer" style="justify-content: flex-end;">
                 <div class="actions-group">
                   @if (isAdmin()) {
-                    <button class="btn btn-outline btn-sm" (click)="editDoctor(doc)">Редагувати</button>
-                    <button class="btn btn-danger btn-sm" (click)="deleteDoctor(doc.id)">Видалити</button>
+                    <div class="dropdown" [class.open]="activeMenu() === doc.id">
+                      <button class="btn btn-icon" data-menu-id="{{ doc.id }}" (click)="toggleMenu(doc.id)">
+                        ⋯
+                      </button>
+                      @if (activeMenu() === doc.id) {
+                        <div class="dropdown-menu" [style.top]="getMenuPosition(doc.id).top" [style.right]="getMenuPosition(doc.id).right">
+                          <button class="dropdown-item" (click)="editDoctor(doc); closeMenu()">Редагувати</button>
+                          <button class="dropdown-item dropdown-item--danger" (click)="deleteDoctor(doc.id); closeMenu()">Видалити</button>
+                        </div>
+                      }
+                    </div>
                   }
                   <button class="btn btn-outline btn-sm" (click)="toggleReviews(doc.id)">
                     {{ expandedDoctors().has(doc.id) ? 'Сховати' : 'Відгуки' }}
