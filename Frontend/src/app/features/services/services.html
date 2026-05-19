@@ -100,7 +100,7 @@
                 <div class="actions-group">
                   @if (isAdmin()) {
                     <div class="dropdown" [class.open]="activeMenu() === service.id">
-                      <button class="btn btn-icon" data-menu-id="{{ service.id }}" (click)="toggleMenu(service.id)">
+                      <button class="btn btn-icon" [attr.data-menu-id]="service.id" (click)="toggleMenu(service.id)">
                         ⋯
                       </button>
                       @if (activeMenu() === service.id) {
