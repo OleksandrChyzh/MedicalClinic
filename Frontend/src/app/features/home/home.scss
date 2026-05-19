@@ -72,51 +72,145 @@
     opacity: 0;
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
   }
+}
 
-  /* Стилізація абстрактного блоку-заглушки для зображення */
-  &__graphic {
-    width: 100%;
-    aspect-ratio: 4/3;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-color) 100%);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--secondary);
-    position: relative;
-    overflow: hidden;
+/* --- AI-віджет --- */
+.ai-widget {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--secondary);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.75rem;
+  }
 
-    /* Декоративне розмите сяйво (градієнт) */
-    .graphic-glow {
-      position: absolute;
-      top: -30%;
-      right: -30%;
-      width: 80%;
-      height: 80%;
-      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-      opacity: 0.15;
-      filter: blur(40px);
+  &__icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  &__title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    color: var(--text-main);
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
     }
 
-    /* Внутрішній контент заглушки */
-    .graphic-content {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      color: var(--primary);
-      font-weight: 600;
-      font-size: 1.25rem;
-
-      .icon {
-        font-size: 3rem;
-      }
+    &::placeholder {
+      color: #94a3b8;
     }
   }
 
+  &__btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  &__result {
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__message {
+    font-size: 0.95rem;
+    color: #166534;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__confirm {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+}
+
+.ai-tag {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  &--urgency {
+    background: #fef9c3;
+    color: #854d0e;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.hero {
   /* --- Адаптивність (Mobile / Tablet) --- */
   @media (max-width: 992px) {
     grid-template-columns: 1fr; /* Одна колонка */

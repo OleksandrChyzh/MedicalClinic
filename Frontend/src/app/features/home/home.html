@@ -17,12 +17,51 @@
   </div>
 
   <div class="hero__visual">
-    <div class="hero__graphic">
-      <div class="graphic-glow"></div>
-      <div class="graphic-content">
-        <span class="icon">✨</span>
-        <span>AI Assisted Medicine</span>
+    <div class="ai-widget">
+      <div class="ai-widget__header">
+        <span class="ai-widget__icon">✨</span>
+        <div>
+          <p class="ai-widget__title">AI-помічник</p>
+          <p class="ai-widget__subtitle">Опишіть симптоми — отримайте рекомендацію</p>
+        </div>
       </div>
+
+      <textarea
+        class="ai-widget__textarea"
+        [(ngModel)]="symptomText"
+        placeholder="Наприклад: болить голова, висока температура, слабкість..."
+        rows="4">
+      </textarea>
+
+      <button
+        class="btn btn-primary ai-widget__btn"
+        [disabled]="isLoading() || !symptomText().trim()"
+        (click)="analyze()">
+        @if (isLoading()) {
+          <span class="spinner"></span> Аналізую...
+        } @else {
+          Проаналізувати симптоми
+        }
+      </button>
+
+      @if (errorMessage()) {
+        <div class="ai-widget__error">{{ errorMessage() }}</div>
+      }
+
+      @if (result()) {
+        <div class="ai-widget__result">
+          <p class="ai-widget__message">{{ result()!.humanMessage }}</p>
+          @if (result()!.isRecognized) {
+            <div class="ai-widget__meta">
+              <span class="ai-tag">{{ result()!.predictedSpecialty }}</span>
+              <span class="ai-tag ai-tag--urgency">{{ result()!.predictedUrgency }}</span>
+            </div>
+            <button class="btn btn-primary ai-widget__confirm" (click)="confirmBooking()">
+              Підтвердити запис
+            </button>
+          }
+        </div>
+      }
     </div>
   </div>
 </section>

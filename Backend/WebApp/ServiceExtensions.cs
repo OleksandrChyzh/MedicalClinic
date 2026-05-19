@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using BLL.Services;
+using WebApp.Services;
 using DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using BLL.MappingProfiles;
@@ -76,6 +77,9 @@ public static class ServiceExtensions
         {
             config.AddMaps(typeof(UserProfile).Assembly);
         });
+
+        services.AddHttpClient("PythonAI");
+        services.AddScoped<IAiTriageService, AiTriageService>();
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
