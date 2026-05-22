@@ -48,7 +48,6 @@ export class DoctorAppointmentsComponent implements OnInit {
   selectedDate = signal<string>('');
   statusFilter = signal<string>('');
 
-  isMedRecordModalOpen = signal(false);
   isSubmittingRecord = signal(false);
   medRecordError = signal<string | null>(null);
   medRecordSuccess = signal<string | null>(null);
@@ -60,6 +59,7 @@ export class DoctorAppointmentsComponent implements OnInit {
   isLoadingMedCard = signal(false);
   medCard = signal<MedicalCardDTO | null>(null);
   medCardError = signal<string | null>(null);
+  isAddRecordFormVisible = signal(false);
 
   appointmentForm!: FormGroup;
 
@@ -284,26 +284,24 @@ export class DoctorAppointmentsComponent implements OnInit {
     });
   }
 
-  openMedicalRecordModal(app: GetAppointmentDTO): void {
-    this.selectedAppForRecord.set(app);
-    this.medRecordForm.reset();
-    this.medRecordError.set(null);
-    this.medRecordSuccess.set(null);
-    this.isMedRecordModalOpen.set(true);
-  }
 
-  closeMedicalRecordModal(): void {
-    this.isMedRecordModalOpen.set(false);
-    this.selectedAppForRecord.set(null);
-  }
-
-  openMedCard(patientId: number): void {
+  openMedCard(app: GetAppointmentDTO): void {
     this.medCard.set(null);
     this.medCardError.set(null);
     this.isLoadingMedCard.set(true);
     this.isMedCardOpen.set(true);
+    this.isAddRecordFormVisible.set(false);
+    this.medRecordSuccess.set(null);
 
-    this.medicalRecordService.getMedicalCard(patientId).subscribe({
+    if (app.status === 'COMPLETED') {
+      this.selectedAppForRecord.set(app);
+      this.medRecordForm.reset();
+      this.medRecordError.set(null);
+    } else {
+      this.selectedAppForRecord.set(null);
+    }
+
+    this.medicalRecordService.getMedicalCard(app.patientId).subscribe({
       next: card => {
         this.medCard.set(card);
         this.isLoadingMedCard.set(false);
@@ -319,6 +317,17 @@ export class DoctorAppointmentsComponent implements OnInit {
   closeMedCard(): void {
     this.isMedCardOpen.set(false);
     this.medCard.set(null);
+    this.selectedAppForRecord.set(null);
+    this.isAddRecordFormVisible.set(false);
+    this.medRecordSuccess.set(null);
+  }
+
+  toggleAddRecordForm(): void {
+    this.isAddRecordFormVisible.update(v => !v);
+    if (!this.isAddRecordFormVisible()) {
+      this.medRecordForm.reset();
+      this.medRecordError.set(null);
+    }
   }
 
   submitMedicalRecord(): void {
@@ -343,7 +352,12 @@ export class DoctorAppointmentsComponent implements OnInit {
       next: () => {
         this.isSubmittingRecord.set(false);
         this.medRecordSuccess.set('Медичний запис успішно збережено!');
-        setTimeout(() => this.closeMedicalRecordModal(), 1500);
+        this.medRecordForm.reset();
+        this.isAddRecordFormVisible.set(false);
+        this.medicalRecordService.getMedicalCard(app.patientId).subscribe({
+          next: updated => this.medCard.set(updated)
+        });
+        setTimeout(() => this.medRecordSuccess.set(null), 3000);
       },
       error: err => {
         console.error('Помилка збереження медичного запису', err);

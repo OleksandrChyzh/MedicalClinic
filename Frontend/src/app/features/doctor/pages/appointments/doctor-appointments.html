@@ -113,11 +113,7 @@
             <button class="action-btn complete" type="button" (click)="changeStatus(app, 'COMPLETED')">Завершити</button>
           }
 
-          @if (app.status === 'COMPLETED') {
-            <button class="action-btn record" type="button" (click)="openMedicalRecordModal(app)">📋 Медичний запис</button>
-          }
-
-          <button class="action-btn card" type="button" (click)="openMedCard(app.patientId)">📂 Медкартка</button>
+          <button class="action-btn card" type="button" (click)="openMedCard(app)">📂 Медкартка</button>
 
           <button class="action-btn next" type="button" (click)="openNextAppointmentModal(app)">Призначити наступний</button>
         </div>
@@ -150,6 +146,17 @@
           </div>
           <span class="records-count-badge">{{ card.records.length }} записів</span>
         </div>
+
+        @if (selectedAppForRecord()) {
+          <div class="add-record-section">
+            @if (medRecordSuccess()) {
+              <div class="alert-success">✅ {{ medRecordSuccess() }}</div>
+            }
+            <button class="btn-toggle-record" type="button" (click)="toggleAddRecordForm()">
+              {{ isAddRecordFormVisible() ? '− Скасувати додавання' : '➕ Додати медичний запис' }}
+            </button>
+          </div>
+        }
 
         @if (card.records.length === 0) {
           <div class="med-card-empty">
@@ -195,67 +202,41 @@
           </div>
         }
       }
-    </div>
-  </div>
-}
 
-@if (isMedRecordModalOpen()) {
-  <div class="modal-overlay" (click)="closeMedicalRecordModal()">
-    <div class="modal-window" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>📋 Медичний запис</h2>
-        <button class="btn-close" type="button" (click)="closeMedicalRecordModal()">×</button>
-      </div>
-
-      @if (selectedAppForRecord(); as app) {
-        <div class="med-record-meta">
-          <span>👤 {{ app.patientFullName }}</span>
-          <span>🩺 {{ app.serviceName }}</span>
-          <span>📅 {{ app.appointmentDate | date: 'dd.MM.yyyy' }}</span>
-        </div>
-      }
-
-      @if (medRecordSuccess()) {
-        <div class="alert-success">✅ {{ medRecordSuccess() }}</div>
-      } @else {
-        <form [formGroup]="medRecordForm" (ngSubmit)="submitMedicalRecord()">
-          <div class="modal-body">
+      @if (isAddRecordFormVisible()) {
+        <div class="add-record-overlay">
+          <form [formGroup]="medRecordForm" (ngSubmit)="submitMedicalRecord()" class="add-record-form">
             <div class="form-group">
               <label>Діагноз <span class="required">*</span></label>
-              <textarea formControlName="diagnosis" rows="3" placeholder="Введіть діагноз пацієнта..."
+              <textarea formControlName="diagnosis" rows="2" placeholder="Введіть діагноз пацієнта..."
                 [class.invalid]="medRecordForm.get('diagnosis')?.invalid && medRecordForm.get('diagnosis')?.touched"></textarea>
               @if (medRecordForm.get('diagnosis')?.invalid && medRecordForm.get('diagnosis')?.touched) {
                 <span class="field-error">Діагноз є обов'язковим полем</span>
               }
             </div>
-
             <div class="form-group">
               <label>Результат огляду</label>
-              <textarea formControlName="result" rows="3" placeholder="Опис результату обстеження..."></textarea>
+              <textarea formControlName="result" rows="2" placeholder="Опис результату обстеження..."></textarea>
             </div>
-
             <div class="form-group">
               <label>Лікування</label>
-              <textarea formControlName="treatment" rows="3" placeholder="Призначене лікування..."></textarea>
+              <textarea formControlName="treatment" rows="2" placeholder="Призначене лікування..."></textarea>
             </div>
-
             <div class="form-group">
               <label>Рекомендації</label>
-              <textarea formControlName="recommendations" rows="3" placeholder="Рекомендації для пацієнта..."></textarea>
+              <textarea formControlName="recommendations" rows="2" placeholder="Рекомендації для пацієнта..."></textarea>
             </div>
-
             @if (medRecordError()) {
               <div class="alert-error">{{ medRecordError() }}</div>
             }
-
-            <div class="modal-actions">
-              <button class="btn-secondary" type="button" (click)="closeMedicalRecordModal()" [disabled]="isSubmittingRecord()">Скасувати</button>
+            <div class="add-record-actions">
+              <button class="btn-secondary" type="button" (click)="toggleAddRecordForm()" [disabled]="isSubmittingRecord()">Скасувати</button>
               <button class="btn-primary" type="submit" [disabled]="medRecordForm.invalid || isSubmittingRecord()">
                 {{ isSubmittingRecord() ? 'Збереження...' : 'Зберегти запис' }}
               </button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       }
     </div>
   </div>
