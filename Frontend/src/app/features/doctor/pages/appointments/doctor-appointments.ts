@@ -4,9 +4,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { ClinicService } from '../../../../core/services/clinic.service';
 import { DoctorService } from '../../../../core/services/doctor.service';
+import { MedicalRecordService } from '../../../../core/services/medical-record.service';
 import { AddAppointmentDTO, FreeSlotDTO, GetAppointmentDTO } from '../../../../models/appointment.model';
 import { Doctor } from '../../../../models/doctor.model';
 import { Direction, MedicalService, ServiceType } from '../../../../models/service.models';
+import { AddMedicalRecordDTO, MedicalCardDTO } from '../../../../models/medical-record.model';
 
 type AppointmentStatus = 'CREATED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
@@ -28,6 +30,7 @@ export class DoctorAppointmentsComponent implements OnInit {
   private appointmentService = inject(AppointmentService);
   private clinicService = inject(ClinicService);
   private doctorService = inject(DoctorService);
+  private medicalRecordService = inject(MedicalRecordService);
   private fb = inject(FormBuilder);
 
   appointments = signal<GetAppointmentDTO[]>([]);
@@ -44,6 +47,19 @@ export class DoctorAppointmentsComponent implements OnInit {
   errorMessage = signal<string | null>(null);
   selectedDate = signal<string>('');
   statusFilter = signal<string>('');
+
+  isMedRecordModalOpen = signal(false);
+  isSubmittingRecord = signal(false);
+  medRecordError = signal<string | null>(null);
+  medRecordSuccess = signal<string | null>(null);
+  selectedAppForRecord = signal<GetAppointmentDTO | null>(null);
+  currentDoctorId = signal<number | null>(null);
+  medRecordForm!: FormGroup;
+
+  isMedCardOpen = signal(false);
+  isLoadingMedCard = signal(false);
+  medCard = signal<MedicalCardDTO | null>(null);
+  medCardError = signal<string | null>(null);
 
   appointmentForm!: FormGroup;
 
@@ -81,8 +97,10 @@ export class DoctorAppointmentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.initMedRecordForm();
     this.loadAppointments();
     this.loadModalStaticData();
+    this.loadDoctorProfile();
   }
 
   loadAppointments(): void {
@@ -248,6 +266,91 @@ export class DoctorAppointmentsComponent implements OnInit {
       case 'COMPLETED': return 'Завершено';
       default: return status;
     }
+  }
+
+  private loadDoctorProfile(): void {
+    this.doctorService.getMyProfile().subscribe({
+      next: profile => this.currentDoctorId.set(profile.doctor.id),
+      error: err => console.error('Помилка завантаження профілю лікаря', err)
+    });
+  }
+
+  private initMedRecordForm(): void {
+    this.medRecordForm = this.fb.group({
+      diagnosis: ['', [Validators.required, Validators.maxLength(500)]],
+      result: ['', Validators.maxLength(2000)],
+      treatment: ['', Validators.maxLength(2000)],
+      recommendations: ['', Validators.maxLength(2000)]
+    });
+  }
+
+  openMedicalRecordModal(app: GetAppointmentDTO): void {
+    this.selectedAppForRecord.set(app);
+    this.medRecordForm.reset();
+    this.medRecordError.set(null);
+    this.medRecordSuccess.set(null);
+    this.isMedRecordModalOpen.set(true);
+  }
+
+  closeMedicalRecordModal(): void {
+    this.isMedRecordModalOpen.set(false);
+    this.selectedAppForRecord.set(null);
+  }
+
+  openMedCard(patientId: number): void {
+    this.medCard.set(null);
+    this.medCardError.set(null);
+    this.isLoadingMedCard.set(true);
+    this.isMedCardOpen.set(true);
+
+    this.medicalRecordService.getMedicalCard(patientId).subscribe({
+      next: card => {
+        this.medCard.set(card);
+        this.isLoadingMedCard.set(false);
+      },
+      error: err => {
+        console.error('Помилка завантаження медичної картки', err);
+        this.medCardError.set('Не вдалося завантажити медичну картку.');
+        this.isLoadingMedCard.set(false);
+      }
+    });
+  }
+
+  closeMedCard(): void {
+    this.isMedCardOpen.set(false);
+    this.medCard.set(null);
+  }
+
+  submitMedicalRecord(): void {
+    if (this.medRecordForm.invalid) return;
+    const app = this.selectedAppForRecord();
+    const doctorId = this.currentDoctorId();
+    if (!app || !doctorId) return;
+
+    const dto: AddMedicalRecordDTO = {
+      patientId: app.patientId,
+      doctorId,
+      serviceId: app.serviceId ?? null,
+      diagnosis: this.medRecordForm.value.diagnosis,
+      result: this.medRecordForm.value.result || null,
+      treatment: this.medRecordForm.value.treatment || null,
+      recommendations: this.medRecordForm.value.recommendations || null
+    };
+
+    this.isSubmittingRecord.set(true);
+    this.medRecordError.set(null);
+    this.medicalRecordService.createRecord(dto).subscribe({
+      next: () => {
+        this.isSubmittingRecord.set(false);
+        this.medRecordSuccess.set('Медичний запис успішно збережено!');
+        setTimeout(() => this.closeMedicalRecordModal(), 1500);
+      },
+      error: err => {
+        console.error('Помилка збереження медичного запису', err);
+        this.medRecordError.set('Не вдалося зберегти запис. Спробуйте ще раз.');
+        this.isSubmittingRecord.set(false);
+      }
+    });
   }
 
   private initForm(): void {

@@ -44,6 +44,79 @@
   </div>
 }
 
+@if (isMedCardOpen()) {
+  <div class="modal-overlay" (click)="closeMedicalCard()">
+    <div class="modal-window med-card-window" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>📂 Медична картка</h2>
+        <button class="btn-close" type="button" (click)="closeMedicalCard()">×</button>
+      </div>
+
+      @if (isLoadingCard()) {
+        <div class="card-loading">
+          <div class="spinner"></div>
+          <p>Завантаження...</p>
+        </div>
+      } @else if (medCardError()) {
+        <div class="alert-error">{{ medCardError() }}</div>
+      } @else if (medCard(); as card) {
+        <div class="med-card-header">
+          <div class="med-card-patient-info">
+            <h3>{{ card.fullName }}</h3>
+            <span>👤 {{ card.gender === 'Male' ? 'Чоловіка' : 'Жіноча' }}</span>
+            <span>🎂 {{ card.dateOfBirth | date: 'dd.MM.yyyy' }}</span>
+          </div>
+          <span class="records-count-badge">{{ card.records.length }} записів</span>
+        </div>
+
+        @if (card.records.length === 0) {
+          <div class="empty-records">
+            <p>Медичних записів поки немає.</p>
+          </div>
+        } @else {
+          <div class="records-list">
+            @for (rec of card.records; track rec.id) {
+              <div class="record-item">
+                <div class="record-item-header">
+                  <span class="record-date">📅 {{ rec.createdAt | date: 'dd.MM.yyyy' }}</span>
+                  <span class="record-doctor">👨‍⚕️ {{ rec.doctorFullName }}</span>
+                  @if (rec.serviceName) {
+                    <span class="record-service">🩺 {{ rec.serviceName }}</span>
+                  }
+                </div>
+                @if (rec.diagnosis) {
+                  <div class="record-field">
+                    <label>Діагноз:</label>
+                    <p>{{ rec.diagnosis }}</p>
+                  </div>
+                }
+                @if (rec.result) {
+                  <div class="record-field">
+                    <label>Результат:</label>
+                    <p>{{ rec.result }}</p>
+                  </div>
+                }
+                @if (rec.treatment) {
+                  <div class="record-field">
+                    <label>Лікування:</label>
+                    <p>{{ rec.treatment }}</p>
+                  </div>
+                }
+                @if (rec.recommendations) {
+                  <div class="record-field">
+                    <label>Рекомендації:</label>
+                    <p>{{ rec.recommendations }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}
+
 @if (isLoading()) {
   <div class="loading-state">Завантаження списку пацієнтів...</div>
 } @else {
@@ -67,6 +140,9 @@
             </div>
           </div>
           <div class="card-actions-right">
+            <button class="btn btn-card" (click)="openMedicalCard(patient.id)" title="Медична картка">
+              📂 Медкартка
+            </button>
             <button class="btn btn-danger-outline" (click)="deletePatient(patient.id)" title="Видалити">
               Видалити
             </button>

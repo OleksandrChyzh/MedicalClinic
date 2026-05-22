@@ -11,7 +11,7 @@ public class MedicalRecordProfile : Profile
         // 1. Створення медичного запису (DTO -> Entity)
         this.CreateMap<AddMedicalRecordDTO, MedicalRecord>()
             // Гарантуємо, що час створення встановлюється коректно при мапінгу
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)));
 
         // 2. Отримання медичного запису (Entity -> DTO)
         this.CreateMap<MedicalRecord, GetMedicalRecordDTO>()

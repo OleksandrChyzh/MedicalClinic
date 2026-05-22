@@ -1,18 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PatientService } from '../../../../core/services/patient.service';
+import { MedicalRecordService } from '../../../../core/services/medical-record.service';
 import { Patient } from '../../../../models/patient.model';
+import { MedicalCardDTO } from '../../../../models/medical-record.model';
 
 @Component({
   selector: 'patients',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule],
   templateUrl: './patients.html',
   styleUrl: './patients.scss'
 })
 export class PatientsComponent implements OnInit {
   private patientService = inject(PatientService);
+  private medicalRecordService = inject(MedicalRecordService);
   private fb = inject(FormBuilder);
 
   // Сигнали стану
@@ -23,6 +26,12 @@ export class PatientsComponent implements OnInit {
   isAdding = signal(false);
   isSaving = signal(false);
   addForm!: FormGroup;
+
+  // Медична картка
+  isMedCardOpen = signal(false);
+  isLoadingCard = signal(false);
+  medCard = signal<MedicalCardDTO | null>(null);
+  medCardError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadPatients();
@@ -87,11 +96,34 @@ export class PatientsComponent implements OnInit {
     if (confirm('Ви впевнені, що хочете видалити цього пацієнта? Цю дію неможливо скасувати.')) {
       this.patientService.deletePatient(id).subscribe({
         next: () => {
-          // Видаляємо пацієнта зі списку
           this.patients.update(current => current.filter(p => p.id !== id));
         },
         error: (err) => console.error('Помилка видалення', err)
       });
     }
+  }
+
+  openMedicalCard(patientId: number): void {
+    this.medCard.set(null);
+    this.medCardError.set(null);
+    this.isLoadingCard.set(true);
+    this.isMedCardOpen.set(true);
+
+    this.medicalRecordService.getMedicalCard(patientId).subscribe({
+      next: card => {
+        this.medCard.set(card);
+        this.isLoadingCard.set(false);
+      },
+      error: err => {
+        console.error('Помилка завантаження медичної картки', err);
+        this.medCardError.set('Не вдалося завантажити медичну картку.');
+        this.isLoadingCard.set(false);
+      }
+    });
+  }
+
+  closeMedicalCard(): void {
+    this.isMedCardOpen.set(false);
+    this.medCard.set(null);
   }
 }

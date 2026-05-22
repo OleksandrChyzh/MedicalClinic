@@ -113,10 +113,151 @@
             <button class="action-btn complete" type="button" (click)="changeStatus(app, 'COMPLETED')">Завершити</button>
           }
 
+          @if (app.status === 'COMPLETED') {
+            <button class="action-btn record" type="button" (click)="openMedicalRecordModal(app)">📋 Медичний запис</button>
+          }
+
+          <button class="action-btn card" type="button" (click)="openMedCard(app.patientId)">📂 Медкартка</button>
+
           <button class="action-btn next" type="button" (click)="openNextAppointmentModal(app)">Призначити наступний</button>
         </div>
       </article>
     }
+  </div>
+}
+
+@if (isMedCardOpen()) {
+  <div class="modal-overlay" (click)="closeMedCard()">
+    <div class="modal-window med-card-window" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>📂 Медична картка пацієнта</h2>
+        <button class="btn-close" type="button" (click)="closeMedCard()">×</button>
+      </div>
+
+      @if (isLoadingMedCard()) {
+        <div class="med-card-loading">
+          <div class="mini-spinner"></div>
+          <p>Завантаження медичної картки...</p>
+        </div>
+      } @else if (medCardError()) {
+        <div class="alert-error">{{ medCardError() }}</div>
+      } @else if (medCard(); as card) {
+        <div class="med-card-patient-header">
+          <div class="med-card-patient-info">
+            <h3>{{ card.fullName }}</h3>
+            <span>👤 {{ card.gender === 'Male' ? 'Чоловіча' : 'Жіноча' }}</span>
+            <span>🎂 {{ card.dateOfBirth | date: 'dd.MM.yyyy' }}</span>
+          </div>
+          <span class="records-count-badge">{{ card.records.length }} записів</span>
+        </div>
+
+        @if (card.records.length === 0) {
+          <div class="med-card-empty">
+            <p>Медичних записів поки немає.</p>
+          </div>
+        } @else {
+          <div class="med-card-records">
+            @for (rec of card.records; track rec.id) {
+              <div class="med-record-entry">
+                <div class="med-record-entry-header">
+                  <span>📅 {{ rec.createdAt | date: 'dd.MM.yyyy' }}</span>
+                  <span>👨‍⚕️ {{ rec.doctorFullName }}</span>
+                  @if (rec.serviceName) {
+                    <span>🩺 {{ rec.serviceName }}</span>
+                  }
+                </div>
+                @if (rec.diagnosis) {
+                  <div class="med-record-field">
+                    <label>Діагноз</label>
+                    <p>{{ rec.diagnosis }}</p>
+                  </div>
+                }
+                @if (rec.result) {
+                  <div class="med-record-field">
+                    <label>Результат</label>
+                    <p>{{ rec.result }}</p>
+                  </div>
+                }
+                @if (rec.treatment) {
+                  <div class="med-record-field">
+                    <label>Лікування</label>
+                    <p>{{ rec.treatment }}</p>
+                  </div>
+                }
+                @if (rec.recommendations) {
+                  <div class="med-record-field">
+                    <label>Рекомендації</label>
+                    <p>{{ rec.recommendations }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}
+
+@if (isMedRecordModalOpen()) {
+  <div class="modal-overlay" (click)="closeMedicalRecordModal()">
+    <div class="modal-window" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>📋 Медичний запис</h2>
+        <button class="btn-close" type="button" (click)="closeMedicalRecordModal()">×</button>
+      </div>
+
+      @if (selectedAppForRecord(); as app) {
+        <div class="med-record-meta">
+          <span>👤 {{ app.patientFullName }}</span>
+          <span>🩺 {{ app.serviceName }}</span>
+          <span>📅 {{ app.appointmentDate | date: 'dd.MM.yyyy' }}</span>
+        </div>
+      }
+
+      @if (medRecordSuccess()) {
+        <div class="alert-success">✅ {{ medRecordSuccess() }}</div>
+      } @else {
+        <form [formGroup]="medRecordForm" (ngSubmit)="submitMedicalRecord()">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Діагноз <span class="required">*</span></label>
+              <textarea formControlName="diagnosis" rows="3" placeholder="Введіть діагноз пацієнта..."
+                [class.invalid]="medRecordForm.get('diagnosis')?.invalid && medRecordForm.get('diagnosis')?.touched"></textarea>
+              @if (medRecordForm.get('diagnosis')?.invalid && medRecordForm.get('diagnosis')?.touched) {
+                <span class="field-error">Діагноз є обов'язковим полем</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Результат огляду</label>
+              <textarea formControlName="result" rows="3" placeholder="Опис результату обстеження..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Лікування</label>
+              <textarea formControlName="treatment" rows="3" placeholder="Призначене лікування..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Рекомендації</label>
+              <textarea formControlName="recommendations" rows="3" placeholder="Рекомендації для пацієнта..."></textarea>
+            </div>
+
+            @if (medRecordError()) {
+              <div class="alert-error">{{ medRecordError() }}</div>
+            }
+
+            <div class="modal-actions">
+              <button class="btn-secondary" type="button" (click)="closeMedicalRecordModal()" [disabled]="isSubmittingRecord()">Скасувати</button>
+              <button class="btn-primary" type="submit" [disabled]="medRecordForm.invalid || isSubmittingRecord()">
+                {{ isSubmittingRecord() ? 'Збереження...' : 'Зберегти запис' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      }
+    </div>
   </div>
 }
 
