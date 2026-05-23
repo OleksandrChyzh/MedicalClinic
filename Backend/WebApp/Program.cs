@@ -58,7 +58,10 @@ using (var scope = app.Services.CreateScope())
         // Міграції залишаємо, щоб база завжди була актуальною
         await context.Database.MigrateAsync();
 
-        // ЗМІНЕНО: Коментуємо виклик сідерів, щоб не спамило в консоль і швидше запускалось
+        // 🟢 ДОДАЙ ОСЬ ЦЕЙ РЯДОК ДЛЯ ЗАПУСКУ ГЕНЕРАЦІЇ:
+        await AppointmentGenerator.GenerateAsync(context);
+
+        // Старий сідер не чіпаємо, якщо ти хотів щоб він був вимкнений:
         //await DbSeeder.SeedAllAsync(context, userManager, roleManager);
     }
     catch (Exception ex)

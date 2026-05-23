@@ -2,6 +2,7 @@ using AutoMapper;
 using BLL.Interfaces;
 using BLL.Models.Appointment;
 using DAL.Entities;
+using DAL.Exceptions;
 using DAL.Interfaces;
 
 namespace BLL.Services;
