@@ -61,6 +61,24 @@ export class DoctorAppointmentsComponent implements OnInit {
   medCardError = signal<string | null>(null);
   isAddRecordFormVisible = signal(false);
 
+  // Обмеження дати для input type="date"
+  readonly minDate = computed(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
+  readonly maxDate = computed(() => {
+    const max = new Date();
+    max.setMonth(max.getMonth() + 1);
+    const year = max.getFullYear();
+    const month = String(max.getMonth() + 1).padStart(2, '0');
+    const day = String(max.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
   appointmentForm!: FormGroup;
 
   patientOptions = computed<DoctorPatientOption[]>(() => {

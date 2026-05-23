@@ -110,6 +110,24 @@ export class AppointmentsComponent implements OnInit {
   public availableSlots = signal<FreeSlotDTO[]>([]);
   public treatmentBookingMessage = signal<string | null>(null);
 
+  // Обмеження дати для input type="date"
+  readonly minDate = computed(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
+  readonly maxDate = computed(() => {
+    const max = new Date();
+    max.setMonth(max.getMonth() + 1);
+    const year = max.getFullYear();
+    const month = String(max.getMonth() + 1).padStart(2, '0');
+    const day = String(max.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
   ngOnInit(): void {
     this.loadAppointments();
     this.initForm();

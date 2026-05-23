@@ -151,6 +151,11 @@ public class AppointmentService(IUnitOfWork unitOfWork, IMapper mapper) : IAppoi
             throw new InvalidOperationException("Неможливо створити запис на дату або час, що вже минули.");
         }
 
+        if (start > DateTime.Now.AddMonths(1))
+        {
+            throw new InvalidParameterException("Неможливо створити запис більш ніж на місяць вперед.");
+        }
+
         // 1. Створюємо словник для перекладу днів тижня на українську
         var dayOfWeekDict = new Dictionary<DayOfWeek, string>
     {
