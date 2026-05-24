@@ -55,6 +55,7 @@ public class AppDbContext : IdentityDbContext<
             b.HasIndex(u => u.Email).IsUnique();
             b.Property(u => u.PhoneNumber).IsRequired().HasMaxLength(20);
             b.Property(u => u.UserName).IsRequired().HasMaxLength(50);
+            b.Property(u => u.IsBlocked).HasDefaultValue(false);
 
             b.Ignore(u => u.AccessFailedCount);
             b.Ignore(u => u.LockoutEnabled);

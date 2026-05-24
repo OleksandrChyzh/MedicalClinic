@@ -42,6 +42,11 @@ public class AuthService(
             throw new UnauthorizedAccessException("Невірний email або пароль");
         }
 
+        if (user.IsBlocked)
+        {
+            throw new UnauthorizedAccessException("Ваш обліковий запис заблоковано. Зверніться до адміністратора.");
+        }
+
         var roles = await userManager.GetRolesAsync(user);
 
         return new AuthResponse

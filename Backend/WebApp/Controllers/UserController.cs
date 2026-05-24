@@ -25,7 +25,7 @@ public class UserController(IUserService userService, UserManager<User> userMana
                 u.Email,
                 u.UserName,
                 u.PhoneNumber,
-                IsBlocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTimeOffset.UtcNow,
+                u.IsBlocked,
                 Roles = (await userManager.GetRolesAsync(u)).FirstOrDefault() ?? "Клієнт",
                 RoleDisplay = (await userManager.GetRolesAsync(u)).FirstOrDefault() switch
                 {
@@ -50,14 +50,13 @@ public class UserController(IUserService userService, UserManager<User> userMana
             return this.NotFound();
         }
 
-        // Переконаємося, що SecurityStamp встановлено
-        if (string.IsNullOrEmpty(user.SecurityStamp))
+        var roles = await userManager.GetRolesAsync(user);
+        if (roles.Contains("Admin") && blocked)
         {
-            await userManager.UpdateSecurityStampAsync(user);
+            return this.BadRequest("Адміністратора не можна заблокувати.");
         }
 
-        user.LockoutEnabled = true;
-        user.LockoutEnd = blocked ? DateTimeOffset.UtcNow.AddYears(100) : null;
+        user.IsBlocked = blocked;
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
