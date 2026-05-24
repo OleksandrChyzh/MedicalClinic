@@ -205,13 +205,23 @@ type PresetKey = '7' | '30' | '90' | 'custom';
                       <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
                     </linearGradient>
                   </defs>
+                  <!-- Y-axis grid lines + labels -->
+                  @for (tick of yTicks(d.trafficByMonth); track tick.y) {
+                    <line [attr.x1]="LEFT_PAD" [attr.y1]="tick.y" [attr.x2]="lineW - PAD" [attr.y2]="tick.y"
+                          stroke="#e2e8f0" stroke-width="1"/>
+                    <text [attr.x]="LEFT_PAD - 6" [attr.y]="tick.y + 4"
+                          text-anchor="end" font-size="16" fill="#94a3b8">{{ tick.label }}</text>
+                  }
+                  <!-- Fill area -->
                   <path [attr.d]="lineFillPath(d.trafficByMonth)" fill="url(#lineGrad)"/>
+                  <!-- Line -->
                   <path [attr.d]="linePath(d.trafficByMonth)" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                  <!-- Dots -->
                   @for (pt of linePoints(d.trafficByMonth); track pt.x) {
                     <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#0ea5e9" stroke="#fff" stroke-width="2"/>
                   }
                 </svg>
-                <div class="line-labels">
+                <div class="line-labels" [style.paddingLeft.px]="LEFT_PAD">
                   @for (item of d.trafficByMonth; track item.label) {
                     <span>{{ item.label }}</span>
                   }
@@ -314,6 +324,8 @@ export class AdminStatisticsComponent implements OnInit {
   readonly lineW = 800;
   readonly lineH = 160;
   readonly PAD = 20;
+  readonly LEFT_PAD = 52;
+  readonly Y_TICKS = 5;
 
   readonly presets: { key: PresetKey; label: string }[] = [
     { key: '7', label: 'Тиждень' },
@@ -391,12 +403,22 @@ export class AdminStatisticsComponent implements OnInit {
   linePoints(items: ChartItemDto[]): { x: number; y: number }[] {
     if (items.length === 0) return [];
     const max = Math.max(...items.map(i => i.value), 1);
-    const w = this.lineW - this.PAD * 2;
+    const w = this.lineW - this.LEFT_PAD - this.PAD;
     const h = this.lineH - this.PAD * 2;
     return items.map((item, idx) => ({
-      x: this.PAD + (idx / Math.max(items.length - 1, 1)) * w,
+      x: this.LEFT_PAD + (idx / Math.max(items.length - 1, 1)) * w,
       y: this.PAD + (1 - item.value / max) * h
     }));
+  }
+
+  yTicks(items: ChartItemDto[]): { y: number; label: number }[] {
+    const max = Math.max(...items.map(i => i.value), 1);
+    const step = max / (this.Y_TICKS - 1);
+    const h = this.lineH - this.PAD * 2;
+    return Array.from({ length: this.Y_TICKS }, (_, i) => {
+      const val = Math.round(step * (this.Y_TICKS - 1 - i));
+      return { y: this.PAD + (i / (this.Y_TICKS - 1)) * h, label: val };
+    });
   }
 
   linePath(items: ChartItemDto[]): string {
@@ -411,6 +433,7 @@ export class AdminStatisticsComponent implements OnInit {
     const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
     const last = pts[pts.length - 1];
     const first = pts[0];
-    return `${line} L${last.x},${this.lineH} L${first.x},${this.lineH} Z`;
+    const bottom = this.lineH - this.PAD;
+    return `${line} L${last.x},${bottom} L${first.x},${bottom} Z`;
   }
 }
