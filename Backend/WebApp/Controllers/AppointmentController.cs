@@ -48,7 +48,7 @@ public class AppointmentController(IAppointmentService appointmentService, IUnit
         });
 
         var revenue = ordered
-            .Where(a => a.Status != AppointmentStatus.CANCELLED)
+            .Where(a => a.Status == AppointmentStatus.COMPLETED)
             .Sum(a => a.Service.Price);
 
         return this.Ok(new { items, revenue });
