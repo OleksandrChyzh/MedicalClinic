@@ -148,6 +148,10 @@ export class ServicesComponent implements OnInit {
     this.expandedReviewForms.set(forms);
   }
 
+  activeReviewServiceId(): number | null {
+    return this.expandedServices().values().next().value ?? null;
+  }
+
   // Допоміжна функція для малювання зірочок
   getStars(rating: number): string {
     return '⭐'.repeat(rating);

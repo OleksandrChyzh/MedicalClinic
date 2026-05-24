@@ -120,17 +120,23 @@
                 </div>
               </div>
 
-              @if (expandedServices().has(service.id)) {
-                <div class="reviews-section reviews-section--overlay">
+            </div>
+          }
+        </div>
+      }
+    }
 
+    @if (activeReviewServiceId(); as serviceId) {
+      <div class="reviews-modal-backdrop" (click)="toggleReviews(serviceId)">
+        <div class="reviews-section reviews-section--overlay" (click)="$event.stopPropagation()">
                   <div class="reviews-overlay-header">
                     <span class="overlay-title">Відгуки пацієнтів</span>
-                    <button class="close-overlay-btn" (click)="toggleReviews(service.id)" title="Закрити">
+            <button class="close-overlay-btn" (click)="toggleReviews(serviceId)" title="Закрити">
                       ✕
                     </button>
                   </div>
 
-                  @if (isLoadingReviews().has(service.id)) {
+          @if (isLoadingReviews().has(serviceId)) {
                     <div class="reviews-loading">
                       <span class="spinner-small"></span> Завантаження...
                     </div>
@@ -141,12 +147,12 @@
                         <button
                           type="button"
                           class="review-compose__toggle"
-                          (click)="toggleReviewForm(service.id)"
-                          [attr.aria-expanded]="expandedReviewForms().has(service.id)">
+                  (click)="toggleReviewForm(serviceId)"
+                  [attr.aria-expanded]="expandedReviewForms().has(serviceId)">
                           <span>Залишити відгук</span>
-                          <span class="review-compose__toggle-icon">{{ expandedReviewForms().has(service.id) ? '−' : '+' }}</span>
+                  <span class="review-compose__toggle-icon">{{ expandedReviewForms().has(serviceId) ? '−' : '+' }}</span>
                         </button>
-                        @if (expandedReviewForms().has(service.id)) {
+                @if (expandedReviewForms().has(serviceId)) {
                           <div class="review-compose__body">
                             <div class="review-compose__rating">
                               <span class="review-compose__label">Оцінка</span>
@@ -164,9 +170,9 @@
                                 }
                               </div>
                             </div>
-                            <label class="review-compose__label" for="svc-review-{{ service.id }}">Коментар (необов’язково)</label>
+                    <label class="review-compose__label" for="svc-review-{{ serviceId }}">Коментар (необов’язково)</label>
                             <textarea
-                              id="svc-review-{{ service.id }}"
+                      id="svc-review-{{ serviceId }}"
                               class="review-compose__textarea"
                               rows="3"
                               maxlength="1000"
@@ -179,7 +185,7 @@
                             <button
                               type="button"
                               class="btn btn-primary btn-sm review-compose__submit"
-                              (click)="submitServiceReview(service.id)"
+                      (click)="submitServiceReview(serviceId)"
                               [disabled]="isSubmittingReview()">
                               {{ isSubmittingReview() ? 'Надсилання…' : 'Надіслати відгук' }}
                             </button>
@@ -190,7 +196,7 @@
                       <p class="reviews-login-hint">Увійдіть у систему, щоб залишити відгук про послугу.</p>
                     }
 
-                    @if (serviceReviews().get(service.id); as reviews) {
+            @if (serviceReviews().get(serviceId); as reviews) {
                       @if (reviews.length === 0) {
                         <p class="no-reviews">Для цієї послуги ще немає відгуків.</p>
                       } @else {
@@ -212,12 +218,7 @@
                     }
                   }
                 </div>
-              }
-
-            </div>
-          }
-        </div>
-      }
+      </div>
     }
 
   </div>
