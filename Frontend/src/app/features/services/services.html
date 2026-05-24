@@ -123,6 +123,13 @@
               @if (expandedServices().has(service.id)) {
                 <div class="reviews-section reviews-section--overlay">
 
+                  <div class="reviews-overlay-header">
+                    <span class="overlay-title">Відгуки пацієнтів</span>
+                    <button class="close-overlay-btn" (click)="toggleReviews(service.id)" title="Закрити">
+                      ✕
+                    </button>
+                  </div>
+
                   @if (isLoadingReviews().has(service.id)) {
                     <div class="reviews-loading">
                       <span class="spinner-small"></span> Завантаження...
