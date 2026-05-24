@@ -92,5 +92,6 @@ public static class ServiceExtensions
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddScoped<IScheduleService, ScheduleService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IAnalyticsService, AnalyticsService>();
     }
 }
