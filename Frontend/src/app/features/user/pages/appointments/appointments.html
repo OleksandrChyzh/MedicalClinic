@@ -44,7 +44,7 @@
               (change)="onStatusFilterChange($event)">
               <option value="">Усі статуси</option>
               @for (st of uniqueStatuses(); track st) {
-                <option [value]="st">{{ st }}</option>
+                <option [value]="st">{{ getStatusLabel(st) }}</option>
               }
             </select>
           </div>
@@ -68,7 +68,7 @@
             <div class="appointment-card">
               <div class="card-header">
                 <span class="status-badge" [ngClass]="getStatusClass(app.status)">
-                  {{ app.status }}
+                  {{ getStatusLabel(app.status) }}
                 </span>
                 <span class="appointment-id">ID: #{{ app.id }}</span>
               </div>
@@ -107,6 +107,59 @@
                     <p>{{ app.durationMinutes }} хв</p>
                   </div>
                 </div>
+
+                @if (app.status.toUpperCase() === 'COMPLETED') {
+                  <div class="review-section">
+                    @if (submittedReviews().has(app.id)) {
+                      <div class="review-sent-badge">✓ Відгук надіслано</div>
+                    } @else if (reviewOpenAppointmentId() !== app.id) {
+                      <button type="button" class="btn-leave-review" (click)="openReviewForm(app.id)">
+                        <span class="btn-leave-review__icon">★</span> Залишити відгук
+                      </button>
+                    } @else {
+                      <div class="review-compose-inline">
+                        <div class="review-compose-inline__header">
+                          <span class="review-compose-inline__title">Ваш відгук</span>
+                          <button type="button" class="review-compose-inline__close" (click)="closeReviewForm()">✕</button>
+                        </div>
+
+                        <div class="review-target-tabs">
+                          <button type="button" class="review-target-tab" [class.active]="reviewTarget() === 'doctor'" (click)="reviewTarget.set('doctor')">
+                            👨‍⚕️ Лікар
+                          </button>
+                          <button type="button" class="review-target-tab" [class.active]="reviewTarget() === 'service'" (click)="reviewTarget.set('service')">
+                            🩺 Послуга
+                          </button>
+                        </div>
+
+                        <p class="review-target-name">
+                          {{ reviewTarget() === 'doctor' ? app.doctorFullName : app.serviceName }}
+                        </p>
+
+                        <div class="review-stars-row">
+                          @for (n of ratingStars; track n) {
+                            <button type="button" class="review-star-btn" [class.active]="reviewRating() >= n" (click)="reviewRating.set(n)" [attr.aria-label]="'Оцінка ' + n + ' з 5'">★</button>
+                          }
+                        </div>
+
+                        <textarea
+                          class="review-textarea"
+                          rows="3"
+                          placeholder="Розкажіть про свій досвід (необов'язково)…"
+                          [ngModel]="reviewComment()"
+                          (ngModelChange)="reviewComment.set($event)"></textarea>
+
+                        @if (reviewError()) {
+                          <p class="review-error-msg">{{ reviewError() }}</p>
+                        }
+
+                        <button type="button" class="btn-submit-review" (click)="submitReview(app)" [disabled]="isSubmittingReview()">
+                          {{ isSubmittingReview() ? 'Надсилання…' : 'Надіслати відгук' }}
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
 
                 @if (canDeleteAppointment(app)) {
                   <div class="card-actions">

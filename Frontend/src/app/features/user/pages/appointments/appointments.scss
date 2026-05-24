@@ -56,10 +56,183 @@
   font-weight: 600;
   text-transform: uppercase;
 
-  &.status-confirmed { background-color: #dcfce7; color: #15803d; }
-  &.status-pending { background-color: #fef9c3; color: #a16207; }
-  &.status-cancelled { background-color: #fee2e2; color: #b91c1c; }
-  &.status-default { background-color: #f1f5f9; color: #475569; }
+  &.status-confirmed  { background-color: #dcfce7; color: #15803d; }
+  &.status-pending    { background-color: #fef9c3; color: #a16207; }
+  &.status-cancelled  { background-color: #fee2e2; color: #b91c1c; }
+  &.status-completed  { background-color: #e0f2fe; color: #0369a1; }
+  &.status-default    { background-color: #f1f5f9; color: #475569; }
+}
+
+// ==========================================
+// СЕКЦІЯ ВІДГУКІВ НА КАРТЦІ ЗАПИСУ
+// ==========================================
+.review-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.review-sent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.btn-leave-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #fefce8;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover { background: #fef08a; border-color: #fbbf24; }
+
+  &__icon { font-size: 1rem; color: #f59e0b; }
+}
+
+.review-compose-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  &__close {
+    background: #e2e8f0;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #64748b;
+    transition: background 0.15s;
+    &:hover { background: #cbd5e1; }
+  }
+}
+
+.review-target-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.review-target-tab {
+  flex: 1;
+  padding: 7px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+
+  &:hover { border-color: #0ea5e9; color: #0284c7; }
+
+  &.active {
+    background: #e0f2fe;
+    border-color: #0ea5e9;
+    color: #0369a1;
+    font-weight: 700;
+  }
+}
+
+.review-target-name {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.review-stars-row {
+  display: flex;
+  gap: 4px;
+}
+
+.review-star-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #cbd5e1;
+  transition: color 0.1s, transform 0.1s;
+  padding: 0 2px;
+  line-height: 1;
+
+  &.active { color: #f59e0b; }
+  &:hover { transform: scale(1.15); }
+}
+
+.review-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #0f172a;
+  background: #fff;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+
+  &:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+}
+
+.review-error-msg {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #b91c1c;
+}
+
+.btn-submit-review {
+  align-self: flex-end;
+  padding: 8px 18px;
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) { background: #0284c7; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 
 .appointment-id { font-size: 0.85rem; color: #94a3b8; }

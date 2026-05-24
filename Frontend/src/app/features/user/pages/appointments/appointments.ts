@@ -1,9 +1,11 @@
 import { Component, OnInit, signal, inject, DestroyRef, computed } from '@angular/core';
+import { switchMap, finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppointmentService } from '../../../../core/services/appointment.service';
+import { ReviewService } from '../../../../core/services/review.service';
 import { DoctorService } from '../../../../core/services/doctor.service';
 import { ClinicService } from '../../../../core/services/clinic.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -17,6 +19,7 @@ import { Doctor } from '../../../../models/doctor.model';
 import { Direction, MedicalService, ServiceType } from '../../../../models/service.models';
 import { Patient } from '../../../../models/patient.model';
 import { UserProfile } from '../../../../models/user.model';
+import { AddReviewDTO } from '../../../../models/review.models';
 
 /** Дані після «Записатися» на сторінці «Послуги» */
 interface BookingPrefill {
@@ -34,13 +37,14 @@ interface DoctorBookingPrefill {
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, FormsModule],
   templateUrl: './appointments.html',
   styleUrl: './appointments.scss'
 })
 export class AppointmentsComponent implements OnInit {
   // Ін'єкція сервісів
   private appointmentService = inject(AppointmentService);
+  private reviewService = inject(ReviewService);
   private doctorService = inject(DoctorService);
   private clinicService = inject(ClinicService);
   private userService = inject(UserService);
@@ -109,6 +113,16 @@ export class AppointmentsComponent implements OnInit {
   public filteredDoctors = signal<Doctor[]>([]);
   public availableSlots = signal<FreeSlotDTO[]>([]);
   public treatmentBookingMessage = signal<string | null>(null);
+
+  // Сигнали для форми відгуків
+  readonly ratingStars = [1, 2, 3, 4, 5];
+  reviewOpenAppointmentId = signal<number | null>(null);
+  reviewTarget = signal<'doctor' | 'service'>('doctor');
+  reviewRating = signal<number>(5);
+  reviewComment = signal<string>('');
+  isSubmittingReview = signal<boolean>(false);
+  reviewError = signal<string | null>(null);
+  submittedReviews = signal<Set<number>>(new Set());
 
   // Обмеження дати для input type="date"
   readonly minDate = computed(() => {
@@ -583,11 +597,68 @@ export class AppointmentsComponent implements OnInit {
   // Динамічний колір статусу
   public getStatusClass(status: string): string {
     if (!status) return 'status-default';
-    switch (status.toLowerCase()) {
-      case 'confirmed': case 'підтверджено': return 'status-confirmed';
-      case 'created': case 'pending': case 'очікується': return 'status-pending';
-      case 'cancelled': case 'скасовано': return 'status-cancelled';
+    switch (status.toUpperCase()) {
+      case 'CONFIRMED': return 'status-confirmed';
+      case 'CREATED': case 'PENDING': return 'status-pending';
+      case 'CANCELLED': return 'status-cancelled';
+      case 'COMPLETED': return 'status-completed';
       default: return 'status-default';
     }
+  }
+
+  public getStatusLabel(status: string): string {
+    switch ((status || '').toUpperCase()) {
+      case 'CREATED':   return 'Нове';
+      case 'CONFIRMED': return 'Підтверджено';
+      case 'CANCELLED': return 'Скасовано';
+      case 'COMPLETED': return 'Завершено';
+      default: return status;
+    }
+  }
+
+  openReviewForm(appointmentId: number): void {
+    this.reviewOpenAppointmentId.set(appointmentId);
+    this.reviewTarget.set('doctor');
+    this.reviewRating.set(5);
+    this.reviewComment.set('');
+    this.reviewError.set(null);
+  }
+
+  closeReviewForm(): void {
+    this.reviewOpenAppointmentId.set(null);
+    this.reviewError.set(null);
+  }
+
+  submitReview(app: GetAppointmentDTO): void {
+    const userId = this.currentUser()?.id;
+    if (!userId) return;
+
+    const target = this.reviewTarget();
+    const dto: AddReviewDTO = {
+      userId,
+      doctorId: target === 'doctor' ? app.doctorId : null,
+      serviceId: target === 'service' ? app.serviceId : null,
+      rating: this.reviewRating(),
+      comment: this.reviewComment().trim() || null
+    };
+
+    this.isSubmittingReview.set(true);
+    this.reviewError.set(null);
+
+    this.reviewService.createReview(dto).subscribe({
+      next: () => {
+        this.isSubmittingReview.set(false);
+        const submitted = new Set(this.submittedReviews());
+        submitted.add(app.id);
+        this.submittedReviews.set(submitted);
+        this.reviewOpenAppointmentId.set(null);
+      },
+      error: (err: unknown) => {
+        this.isSubmittingReview.set(false);
+        const body = (err as { error?: string | { message?: string; title?: string } })?.error;
+        const msg = typeof body === 'string' ? body : body?.message || body?.title || 'Не вдалося надіслати відгук.';
+        this.reviewError.set(msg);
+      }
+    });
   }
 }
